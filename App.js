@@ -1,21 +1,45 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { Component } from 'react';
+import { StyleSheet, View, SafeAreaView, ScrollView } from 'react-native';
+import { Weather } from './components/weather';
+import { PastFrioDischarge } from './components/past_frio_discharge';
+import Discharge from './components/current_discharge';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+export default class App extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView>
+            <Discharge/>
+            <View>
+              <Weather/>
+              <PastFrioDischarge/>
+            </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+  
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: '#03a5fc'
   },
-});
+  icon: {
+    textAlign: 'center'
+  },
+  listItem: {
+    textAlign: 'center',
+  },
+  image: {
+    height:'100%',
+    width:'100%'
+  }
+    
+})
