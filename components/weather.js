@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { ActivityIndicator, StyleSheet, View} from 'react-native';
 import { Text,Image,Card } from 'react-native-elements';
-import { format,parseISO } from 'date-fns'
+import { format,getHours,parseISO } from 'date-fns'
+import { Dimensions } from 'react-native';
 
 export class Weather extends Component {
     _isMounted = false;
+    currentTime = new Date().getHours();
 
     constructor(props){
         super(props)
@@ -38,24 +40,20 @@ export class Weather extends Component {
     render(){
         const data = this.state.data;
         const isLoading = this.state.isLoading;
-
         return(
-            <View>
+            <View style={styles.content}>
                 {isLoading ? <ActivityIndicator/> : (
                 <View>
-                  <Card containerStyle={styles.card}>
-                    <Card.Title>Current Weather</Card.Title>
-                    <Text h2 style={styles.temperature}>{data.current.temperature}&#176;F</Text>
-                    <Text h4 style={styles.description}>{data.current.weather_descriptions[0]}{"     "}
-                      <Image containerStyle={styles.image}
-                          source={{uri: data.current.weather_icons[0]}}
-                          style={{ width: 50, height: 50 }}
-                          PlaceholderContent={<ActivityIndicator />}
-                      />
-                    </Text>
-                    
-                    <Text h4>{data.current.precip}% chance of rain</Text>
-                    <Card.Divider/>
+                  <Card containerStyle={[styles.card, this.currentTime > 19 || this.currentTime < 7 ? styles.cardNight : styles.cardDay]}>
+                    <View style={styles.container}>
+                      <Text h1 style={{color:'white'}}>{data.current.temperature}&#176;F</Text>
+                      <Text h4 style={{color:'white'}}>{data.current.weather_descriptions[0]}
+                        <Image source={{uri:data.current.weather_icons[0]}} style={styles.image}/>
+                      </Text>
+                    </View>
+                    <Text style={styles.text}>Feels like {data.current.feelslike}&#176;F</Text>
+                    <Text style={styles.text}>{data.current.precip}% chance of rain</Text>
+                    <Card.Divider style={{backgroundColor: 'white'}}/>
                     <Text style={styles.update}>Last updated: {format(parseISO(data.location.localtime), 'MM/dd/yyyy hh:mm a')}</Text>
                   </Card>
 
@@ -73,17 +71,32 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 25
   },
-  temperature: {
-    color: 'grey'
+  cardDay: {
+    backgroundColor: '#94b4e3',
   },
-  description: {
-    color: 'black'
+  cardNight: {
+    backgroundColor: '#3c4a91',
+  },
+  container: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   },
   image: {
-    alignContent: 'center'
+    alignContent: 'center',
+    width: 50,
+    height: 50
   },
   update: {
-    color: 'grey',
+    color: '#D3D3D3',
     textAlign: 'center'
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  text: {
+    fontSize: 17,
+    color: 'white'
   }
 })

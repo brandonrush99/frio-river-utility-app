@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text,ListItem,Button,Icon } from 'react-native-elements';
+import { Text,ListItem,Button,Overlay } from 'react-native-elements';
 
 
 export class PastFrioDischarge extends Component {
@@ -45,22 +45,22 @@ export class PastFrioDischarge extends Component {
             <View>
               <Text>{"\n"}</Text>
               <Button                
-                title='Historical Discharge Rates'           
+                title='Quick Frio Family Historical Rates'       
                 onPress={this.toggleHistoricalData.bind(this)} 
                 containerStyle={styles.button}
                ></Button>
               {this.state.showHistoricalData == false ? null : (
-                <View>
+                <Overlay backdropStyle={styles.backdrop} overlayStyle={styles.overlay} onBackdropPress={this.toggleHistoricalData.bind(this)}>
                   {
                     years.map((y,i) => (
                     <ListItem key={i} bottomDivider>
                         <ListItem.Content>
-                        <ListItem.Title style={{textAlign: 'center'}}>{y.year} : {y.discharge}</ListItem.Title>
+                        <ListItem.Title style={styles.listItem}>{y.year} : {y.discharge}</ListItem.Title>
                         </ListItem.Content>
                     </ListItem>
                     )
                   )}
-                </View>
+                </Overlay>
               )}
               
             </View>
@@ -72,7 +72,21 @@ const styles = StyleSheet.create({
   button: {
     width: '75%',
     alignSelf: 'center',
-    borderRadius: 10
+    borderRadius: 10,
+    borderColor: 'black',
+    backgroundColor: '#90C978'
+  },
+  overlay: {
+    width: '90%',
+    borderRadius: 15,
+  },
+  backdrop: {
+      //backgroundColor: 'black',
+      shadowOpacity: 100
+  },
+  listItem: {
+    alignSelf: 'center',
+    fontSize: 20
   }
 
 })

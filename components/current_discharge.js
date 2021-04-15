@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ActivityIndicator,View,StyleSheet } from 'react-native';
-import { Text,Card,Icon} from 'react-native-elements';
-import { format,parseISO } from 'date-fns'
+import { Text,Card,Icon,ListItem, Overlay} from 'react-native-elements';
+import { format,parseISO } from 'date-fns';
 
 export default class Discharge extends Component {
     _isMounted = false;
@@ -12,7 +12,8 @@ export default class Discharge extends Component {
       this.state = {
         data: [],
         isLoading: true,
-        showHistoricalData: false
+        showHistoricalData: false,
+        showDescripton: false
       };
     }
 
@@ -36,18 +37,28 @@ export default class Discharge extends Component {
     this._isMounted = false;
     }
 
+    iconClick(){
+        this.setState(previousState => ({ showDescripton: !previousState.showDescripton }));
+    }
+
     render() {
         const data = this.state.data;
         const isLoading = this.state.isLoading;
         var current_discharge;
 
         if (this._isMounted) {
-        current_discharge = parseFloat(data.value.timeSeries[0].values[0].value[0].value,10);
+            current_discharge = parseFloat(data.value.timeSeries[0].values[0].value[0].value,10);
         }
+
+        const floatVals = [
+            "0-25 : Bad Floating",
+            "25-50 : Average Floating",
+            "50-250 : Good Floating",
+            "250+ : Jack would drown probably"
+        ];
 
         return (
             <View>
-                <Text h3 style={styles.header}>Welcome to Frio Watch!</Text>
                 {isLoading ? <ActivityIndicator/> : (
                 <View>
                     <Card containerStyle={styles.card}>
@@ -55,21 +66,39 @@ export default class Discharge extends Component {
                     <Card.Divider/>
                     {
                         <View style={{alignItems: 'center'}}>
-                            <Text h4 style={styles.value}>
+                            <Text h3 style={styles.value}>
                                 {current_discharge}{"   "}
-                                {current_discharge > 50 ? <Icon solid name='smile' type='font-awesome-5' color='#0ffc03'/> : 
-                                current_discharge > 25 ? <Icon solid name='meh' type='font-awesome-5' color='#ebe534'/> : (
-                                <Icon solid name='frown' type='font-awesome-5' color='#f54842'/>
-                                )}
+                                    {current_discharge > 50 ? <Icon solid name='smile' type='font-awesome-5' color='#0ffc03' onPress={this.iconClick.bind(this)}/> : 
+                                    current_discharge > 25 ? <Icon solid name='meh' type='font-awesome-5' color='#ebe534' onPress={this.iconClick.bind(this)}/> : (
+                                    <Icon solid name='frown' type='font-awesome-5' color='#f54842' onPress={this.iconClick.bind(this)}/>
+                                    )}
                             </Text>
                             
                         </View>
                     }
                     <Card.Divider/>
                     {
-                        <Text style={styles.date}>
-                        Last Updated: {format(parseISO(data.value.timeSeries[0].values[0].value[0].dateTime), 'MM/dd/yyyy hh:mm a')}
-                        </Text>
+                        <View>
+                            {this.state.showDescripton === false ? null :
+                                <Overlay backdropStyle={styles.backdrop} overlayStyle={styles.overlay} onBackdropPress={this.iconClick.bind(this)}>
+                                    {
+                                        floatVals.map((v,i) => (
+                                        <ListItem key={i} >
+                                            <ListItem.Content>
+                                                <ListItem.Title style={styles.listValues}>{v}</ListItem.Title>
+                                            </ListItem.Content>
+                                        </ListItem>
+                                            )
+                                        ) 
+                                    }
+                                    
+                                </Overlay>
+                                
+                            }
+                            <Text style={styles.date}>
+                            Last Updated: {format(parseISO(data.value.timeSeries[0].values[0].value[0].dateTime), 'MM/dd/yyyy hh:mm a')}
+                            </Text>
+                        </View>
                     }
                     </Card> 
                 </View>
@@ -84,9 +113,8 @@ const styles = StyleSheet.create({
     card: {
         borderRadius: 25
     },
-    header: {
-        textAlign: 'center',
-        marginTop: 50,
+    description: {
+        color: 'grey'
     },
     date: {
         color: 'grey',
@@ -94,6 +122,19 @@ const styles = StyleSheet.create({
     },
     value: {
         textAlign: 'center',
+    },
+    listValues: {
+        textAlign: 'center',
+        fontSize: 20,
+        alignSelf: 'center'
+    },
+    overlay: {
+        width: '90%',
+        borderRadius: 15,
+    },
+    backdrop: {
+        //backgroundColor: 'black',
+        shadowOpacity: 100
     }
 
 })
