@@ -17,7 +17,17 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSExceptionDomains": {
+            "http://api.weatherstack.com": {
+              "NSExceptionAllowsInsecureHTTPLoads" : true,
+              "NSIncludesSubdomains" : true
+            }
+          }
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {

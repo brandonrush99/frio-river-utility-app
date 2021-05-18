@@ -45,9 +45,9 @@ export class PastFrioDischarge extends Component {
             <View>
               <Text>{"\n"}</Text>
               <Button                
-                title='Quick Frio Family Historical Rates'       
+                title='Quick Wade Family Historical Frio Rates'       
                 onPress={this.toggleHistoricalData.bind(this)} 
-                containerStyle={styles.button}
+                buttonStyle={styles.button}
                ></Button>
               {this.state.showHistoricalData == false ? null : (
                 <Overlay backdropStyle={styles.backdrop} overlayStyle={styles.overlay} onBackdropPress={this.toggleHistoricalData.bind(this)}>
@@ -74,7 +74,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 10,
     borderColor: 'black',
-    backgroundColor: '#90C978'
   },
   overlay: {
     width: '90%',
