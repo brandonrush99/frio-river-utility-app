@@ -90,6 +90,8 @@ export default class DischargeLookup extends Component {
                                         onChange={this.setStartDate}
                                         value={this.state.startDate}
                                         display="spinner"
+                                        maximumDate={new Date()}
+                                        minimumDate={new Date(1950,8,30)}
                                     />
                                     <Button style={styles.doneButton} title="Done" type="solid" onPress={this.toggleStartSpinner.bind(this)}/>
                                 </View>
@@ -103,6 +105,8 @@ export default class DischargeLookup extends Component {
                                         onChange={this.setEndDate}
                                         value={this.state.endDate}
                                         display="spinner"
+                                        maximumDate={new Date()}
+                                        minimumDate={new Date(1950,8,30)}
                                     />
                                     <Button style={styles.doneButton} title="Done" type="solid" onPress={this.toggleEndSpinner.bind(this)}/>
                                 </View>

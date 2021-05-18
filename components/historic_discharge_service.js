@@ -13,7 +13,7 @@ export class HistoricDischargeService extends Component{
   
       this.state = {
         data: [],
-        isLoading: true,
+        error: false,
       };
     }
 
@@ -30,9 +30,9 @@ export class HistoricDischargeService extends Component{
               this.setState({ data: json });
             }
           })
-          .catch((error) => console.error(error))
-          .finally(() => {
-            this.setState({ isLoading: false });
+          .catch((error) => {
+            console.error(error);
+            this.setState({error: true});
           });
     }
     
@@ -42,11 +42,11 @@ export class HistoricDischargeService extends Component{
 
     render(){
       const data = this.state.data;
-      const isLoading = this.state.isLoading;
+      //const isLoading = this.state.isLoading;
       let maximum = -1;
       let minimum = 100000000;
       let meanValue = 0;
-      if (this._isMounted) {
+      if (this._isMounted && this.state.error === false) {
         let maxValues = data.value.timeSeries[3].values[0].value;
         let minValues = data.value.timeSeries[4].values[0].value;
         let meanValues = data.value.timeSeries[5].values[0].value;
