@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "frio-river-water-mobile",
+    "name": "Frio Watch",
     "slug": "frio-river-water-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/floating_icon_white.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/floating_icon_white.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -18,6 +18,8 @@
     ],
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "brandonrush.friowatch",
+      "buildNumber": "1.0.0",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSExceptionDomains": {

@@ -68,8 +68,8 @@ export default class Discharge extends Component {
                         <View style={{alignItems: 'center'}}>
                             <Text h3 style={styles.value}>
                                 {current_discharge}{"   "}
-                                    {current_discharge > 50 ? <Icon solid name='smile' type='font-awesome-5' color='#0ffc03' onPress={this.iconClick.bind(this)}/> : 
-                                    current_discharge > 25 ? <Icon solid name='meh' type='font-awesome-5' color='#ebe534' onPress={this.iconClick.bind(this)}/> : (
+                                    {current_discharge > 50 ? <Icon solid name='smile' type='font-awesome-5' color='#21db04' onPress={this.iconClick.bind(this)}/> : 
+                                    current_discharge > 25 ? <Icon solid name='meh' size={35} type='font-awesome-5' color='#21db04' onPress={this.iconClick.bind(this)}/> : (
                                     <Icon solid name='frown' type='font-awesome-5' color='#f54842' onPress={this.iconClick.bind(this)}/>
                                     )}
                             </Text>

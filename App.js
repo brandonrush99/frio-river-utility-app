@@ -17,6 +17,7 @@ export default class App extends Component {
   }
 
   GITHUB_LINK = 'https://github.com/brandonrush99/frio-river-utility-app';
+  ICON_LINK = 'https://www.flaticon.com/';
 
   infoClick() {
     this.setState(previousState => ({ infoClicked: !previousState.infoClicked }));
@@ -37,6 +38,13 @@ export default class App extends Component {
                 <Text style={styles.infoText}>This app was created by Brandon Rush</Text>
                 <Card.Divider/>
                 <Text style={styles.githubLink} onPress={() => { Linking.openURL(this.GITHUB_LINK) }}>Click here for the GitHub for this project</Text>
+                <Card.Divider/>
+                <Text style={styles.infoText}>
+                  Icon for app made by Freepik from{" "}
+                  <Text style={styles.githubLink} onPress={() => {Linking.openURL(this.ICON_LINK) }}>
+                    www.flaticon.com
+                  </Text>
+                </Text>
               </Card>
               
             </Overlay> :
