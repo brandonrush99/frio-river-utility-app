@@ -18,7 +18,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "brandonrush.friowatch",
+      "bundleIdentifier": "com.BrandonRush.FrioWatch",
       "buildNumber": "1.0.0",
       "infoPlist": {
         "NSAppTransportSecurity": {
