@@ -40,22 +40,41 @@ export class Weather extends Component {
     render(){
         const data = this.state.data;
         const isLoading = this.state.isLoading;
+        let connectionIssue = false;
+        let temperature = -1;
+        try {
+          temperature = data.current.temperature;
+        } catch (error) {
+          connectionIssue = true;
+        }
         return(
             <View style={styles.content}>
                 {isLoading ? <ActivityIndicator/> : (
                 <View>
-                  <Card containerStyle={[styles.card, this.currentTime > 19 || this.currentTime < 7 ? styles.cardNight : styles.cardDay]}>
-                    <View style={styles.container}>
-                      <Text h1 style={{color:'white'}}>{data.current.temperature}&#176;F</Text>
-                      <Text h4 style={{color:'white'}}>{data.current.weather_descriptions[0]}
-                        <Image source={{uri:data.current.weather_icons[0]}} style={styles.image}/>
-                      </Text>
-                    </View>
-                    <Text style={styles.text}>Feels like {data.current.feelslike}&#176;F</Text>
-                    <Text style={styles.text}>{data.current.precip}% chance of rain</Text>
-                    <Card.Divider style={{backgroundColor: 'white'}}/>
-                    <Text style={styles.update}>Last updated: {format(parseISO(data.location.localtime), 'MM/dd/yyyy hh:mm a')}</Text>
-                  </Card>
+                  {connectionIssue === false ? 
+                    <Card containerStyle={[styles.card, this.currentTime > 19 || this.currentTime < 7 ? styles.cardNight : styles.cardDay]}>
+                      <View style={styles.container}>
+                        <Text h1 style={{color:'white'}}>{data.current.temperature}&#176;F</Text>
+                        <Text h4 style={{color:'white'}}>{data.current.weather_descriptions[0]}
+                          <Image source={{uri:data.current.weather_icons[0]}} style={styles.image}/>
+                        </Text>
+                      </View>
+                      <Text style={styles.text}>Feels like {data.current.feelslike}&#176;F</Text>
+                      <Text style={styles.text}>{data.current.precip}% chance of rain</Text>
+                      <Card.Divider style={{backgroundColor: 'white'}}/>
+                      <Text style={styles.update}>Last updated: {format(parseISO(data.location.localtime), 'MM/dd/yyyy hh:mm a')}</Text>
+                    </Card> :
+                    <Card containerStyle={[styles.card, this.currentTime > 19 || this.currentTime < 7 ? styles.cardNight : styles.cardDay]}>
+                      <View style={styles.container}>
+                        <Text h1 style={{color:'white'}}>{temperature}&#176;F</Text>
+                        <Text h4 style={{color:'white'}}>None</Text>
+                      </View>
+                      <Text style={styles.text}>Feels like -1&#176;F</Text>
+                      <Text style={styles.text}>-1% chance of rain</Text>
+                      <Card.Divider style={{backgroundColor: 'white'}}/>
+                    </Card>
+                  }
+                  
 
           
                 </View>

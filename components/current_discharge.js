@@ -44,10 +44,16 @@ export default class Discharge extends Component {
     render() {
         const data = this.state.data;
         const isLoading = this.state.isLoading;
-        var current_discharge;
+        let current_discharge;
+        let connectionIssue = false;
 
         if (this._isMounted) {
-            current_discharge = parseFloat(data.value.timeSeries[0].values[0].value[0].value,10);
+            try {
+                current_discharge = parseFloat(data.value.timeSeries[0].values[0].value[0].value,10);  
+            } catch (error) {
+                connectionIssue = true;
+            }
+            
         }
 
         const floatVals = [
@@ -66,14 +72,16 @@ export default class Discharge extends Component {
                     <Card.Divider/>
                     {
                         <View style={{alignItems: 'center'}}>
-                            <Text h3 style={styles.value}>
-                                {current_discharge}{"   "}
-                                    {current_discharge > 50 ? <Icon solid name='smile' type='font-awesome-5' color='#21db04' onPress={this.iconClick.bind(this)}/> : 
-                                    current_discharge > 25 ? <Icon solid name='meh' size={35} type='font-awesome-5' color='#21db04' onPress={this.iconClick.bind(this)}/> : (
-                                    <Icon solid name='frown' type='font-awesome-5' color='#f54842' onPress={this.iconClick.bind(this)}/>
-                                    )}
-                            </Text>
-                            
+                            {connectionIssue === false ? 
+                                <Text h3 style={styles.value}>
+                                    {current_discharge}{"   "}
+                                        {current_discharge > 50 ? <Icon solid name='smile' type='font-awesome-5' color='#21db04' onPress={this.iconClick.bind(this)}/> : 
+                                        current_discharge > 25 ? <Icon solid name='meh' size={35} type='font-awesome-5' color='#21db04' onPress={this.iconClick.bind(this)}/> : (
+                                        <Icon solid name='frown' type='font-awesome-5' color='#f54842' onPress={this.iconClick.bind(this)}/>
+                                        )}
+                                </Text> :
+                                <Text>Error</Text>
+                            }
                         </View>
                     }
                     <Card.Divider/>
