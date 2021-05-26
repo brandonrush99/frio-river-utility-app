@@ -104,7 +104,7 @@ export default class Discharge extends Component {
                                 
                             }
                             <Text style={styles.date}>
-                            Last Updated: {format(parseISO(data.value.timeSeries[0].values[0].value[0].dateTime), 'MM/dd/yyyy hh:mm a')}
+                            Last Updated: {format(parseISO(data.value.timeSeries[0].values[0].value[0].dateTime), 'MM/dd/yyyy h:mm a')}
                             </Text>
                         </View>
                     }

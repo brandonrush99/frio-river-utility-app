@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, StyleSheet, View} from 'react-native';
+import { ActivityIndicator, StyleSheet, View, TouchableOpacity} from 'react-native';
 import { Text,Image,Card } from 'react-native-elements';
-import { format,getHours,parseISO } from 'date-fns'
-import { Dimensions } from 'react-native';
+import { format,parseISO,isPast,isThisHour  } from 'date-fns';
 
 export class Weather extends Component {
     _isMounted = false;
@@ -10,65 +9,124 @@ export class Weather extends Component {
     constructor(props){
         super(props)
         this.state = {
-            data: [],
-            isLoading: true
+            forecastData: [],
+            precipitationData: [],
+            isLoading: true,
+            futureMode: false
         }
+        this.toggleFutureMode = this.toggleFutureMode.bind(this);
+    }
+
+    //29.503235512087382, -99.72173117275169
+    toggleFutureMode(){
+      this.setState(previousState => ({ futureMode: !previousState.futureMode }));
+    }
+    
+    getPrecipitation() {
+      let url = 'https://api.weather.gov/gridpoints/EWX/79,58';
+      fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/geo+json',
+          'User-Agent': 'FrioWatch'
+        }
+      })
+      .then((response) => response.json())
+      .then((json) => {
+        this.setState({precipitationData: json}, () => {
+          this._isMounted = true;
+        });
+      })
+      .catch((error) => console.error(error))
+      .finally(() => {
+        this.setState({ isLoading: false }, () => {
+          return 0;
+        });
+      });
+    }
+    getForecastHourly() {
+      let url = 'https://api.weather.gov/gridpoints/EWX/79,58/forecast/hourly';
+      fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/geo+json',
+          'User-Agent': 'FrioWatch'
+        }
+      })
+      .then((response) => response.json())
+      .then((json) => {
+        this.setState({forecastData: json});
+      })
+      .catch((error) => console.error(error))
+      .finally(() => {
+        return this.getPrecipitation();
+      });
     }
 
     componentDidMount() {
-        let url = 'https://api.weather.gov/gridpoints/EWX/87,62/forecast';
-        fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/geo+json',
-            'User-Agent': 'FrioWatch'
-          }
-        })
-        .then((response) => response.json())
-        .then((json) => {
-          this.setState({data: json}, () => {
-            this._isMounted = true;
-          });
-        })
-        .catch((error) => console.error(error))
-        .finally(() => {
-          this.setState({ isLoading: false });
-        });
-      }
+        let r1 = this.getForecastHourly();
+        console.log(r1);
+    }
     
       componentWillUnmount(){
         this._isMounted = false;
       }
-   
+
+      findPrecipitation(data, time){
+        let precipitationData = data.properties.probabilityOfPrecipitation;
+        let index = 0;
+        for (let i = 0; i < precipitationData.values.length; i++){
+          if (precipitationData.values[i].validTime.slice(0,11) === time.slice(0,11) && 
+              parseInt(precipitationData.values[i].validTime.slice(11,13)) >= parseInt(time.slice(11,13))){
+                index = i;
+                break;
+          }
+        }
+        return precipitationData.values[index].value;
+      }
+
+    getFuturecast(data){
+      let futurecast = [];
+      let counter = 0;
+      for (let i = 0; i < data.properties.periods.length; i++){
+        if (isPast(parseISO(data.properties.periods[i].startTime.slice(0,19))) && 
+            !isThisHour(parseISO(data.properties.periods[i].startTime.slice(0,19)))){
+          continue;
+        }
+        else if (counter >= 6){
+          break;
+        }
+        else {
+          futurecast.push(
+            {
+              time: data.properties.periods[i].startTime.slice(0,19),
+              temperature: data.properties.periods[i].temperature,
+              precipitation: this.findPrecipitation(this.state.precipitationData, data.properties.periods[i].startTime.slice(0,19))
+            }
+          );
+          counter++;
+        }
+        
+      }
+      return futurecast;
+    }
 
     render(){
         const isLoading = this.state.isLoading;
-        const data = this.state.data;
+        const data = this.state.forecastData;
         let connectionIssue = false;
-        let temperatureNow = -1;
-        let temperatureLater = -1;
-        let precipitationNow = '';
-        let precipitationLater = '';
         let forecastNow = 'None';
-        //let forecastLater = 'None';
+        let futurecast = [];
         let windspeed = 'None';
         let iconUrl = '';
-        let later = '';
         let isDayTime = true;
         if (this._isMounted === true){
           try {
-            temperatureNow = data.properties.periods[0].temperature;
-            temperatureLater = data.properties.periods[1].temperature;
-            windspeed = data.properties.periods[0].windSpeed;
-            forecastNow = data.properties.periods[0].shortForecast;
-            //forecastLater = data.properties.periods[1].shortForecast;
-            iconUrl = data.properties.periods[0].icon;
-            let posNow = data.properties.periods[0].detailedForecast.indexOf('%');
-            let posLater = data.properties.periods[1].detailedForecast.indexOf('%');
-            precipitationNow = data.properties.periods[0].detailedForecast.slice(posNow-2,posNow+1);
-            precipitationLater = data.properties.periods[1].detailedForecast.slice(posLater-2,posLater+1);
-            later = data.properties.periods[1].name;
-            isDayTime = data.properties.periods[0].isDaytime;
+              futurecast = this.getFuturecast(data);
+              windspeed = data.properties.periods[0].windSpeed;
+              forecastNow = data.properties.periods[0].shortForecast;
+              iconUrl = data.properties.periods[0].icon;
+              isDayTime = data.properties.periods[0].isDaytime;
           } catch (error) {
               console.log(error);
               connectionIssue = true;
@@ -79,22 +137,43 @@ export class Weather extends Component {
             <View style={styles.content}>
                 {isLoading ? <ActivityIndicator/> : (
                 <View>
+                  <TouchableOpacity onPress={this.toggleFutureMode}>
                   {connectionIssue === false ? 
                     <Card containerStyle={[styles.card, isDayTime === false ? styles.cardNight : styles.cardDay]}>
                       <View style={styles.container}>
-                        <Text h1 style={{color:'white'}}>{temperatureNow}&#176;F</Text>
+                        <Text h1 style={{color:'white'}}>{futurecast[0].temperature}&#176;F</Text>
+                        
                         <Image source={{uri: iconUrl}} style={styles.image}/>  
                       </View>
                       <Card.Divider style={{backgroundColor: 'white'}}/>
-                      <Text style={styles.textNow}>{forecastNow}</Text>
-                      <Text style={styles.textNow}>{windspeed} wind</Text>
-                      <Text style={styles.textNow}>{precipitationNow} chance of rain</Text>
+                      <View>
+                        {this.state.futureMode ? 
+                          <View>
+                            {
+                              futurecast.slice(1,).map((f,i) => (
+                                <View key={i} style={styles.futureForecastContainer}>
+                                  <Text style={styles.textLaterTime}>{format(parseISO(f.time), 'h a')}: </Text>  
+                                  <Text style={styles.textLater}>{f.temperature}&#176;F</Text>
+                                  <Text style={styles.textLater}>{f.precipitation}% rain</Text>
+                                </View>
+                              ))
+                            }
+                          </View> :
+                          <View>
+                            <Text style={styles.textForecast}>{forecastNow}</Text>
+                            <Text style={styles.textNow}>{futurecast[0].precipitation}% rain</Text>
+                            <Text style={styles.textNow}>{windspeed} wind</Text>
+                          </View>
+                        }
+
+                      </View>
                       <Card.Divider style={{backgroundColor: 'white'}}/>
-                      <Text style={styles.textLater}>{later}: {temperatureLater}&#176;F and {precipitationLater} chance of rain</Text>
-                    </Card> :
-                    <Card containerStyle={[styles.card, this.currentTime > 19 || this.currentTime < 7 ? styles.cardNight : styles.cardDay]}>
+                      <Text style={styles.asOf}>As of {format(parseISO(futurecast[0].time), 'MM/dd/yyyy h:mm a')}</Text>
+                    </Card> 
+                    :
+                    <Card containerStyle={[styles.card, isDayTime === false ? styles.cardNight : styles.cardDay]}>
                       <View style={styles.container}>
-                        <Text h1 style={{color:'white'}}>{temperature}&#176;F</Text>
+                        <Text h1 style={{color:'white'}}>{futurecast[0].temperature}&#176;F</Text>
                         <Text h4 style={{color:'white'}}>None</Text>
                       </View>
                       <Text style={styles.textNow}>Feels like -1&#176;F</Text>
@@ -102,6 +181,7 @@ export class Weather extends Component {
                       <Card.Divider style={{backgroundColor: 'white'}}/>
                     </Card>
                   }
+                  </TouchableOpacity>
                 </View>
                 )} 
             </View>
@@ -124,6 +204,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between'
   },
+  futureForecastContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+  },
+  bottomContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'flex-start'
+  },
+  futureForecast: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
   image: {
     alignContent: 'center',
     width: 50,
@@ -141,9 +236,25 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: 'white',
   },
+  textForecast: {
+    fontSize: 18,
+    color: 'white'
+  },
+  textLaterTime: {
+    fontSize: 16,
+    color: 'gray',
+  },
   textLater: {
-    fontSize: 15,
+    fontSize: 17,
     color: 'white',
-    alignSelf: 'center'
+    
+  },
+  asOf: {
+    color: 'gray',
+    textAlign: 'center'
+  },
+  icon: {
+    
+    
   }
 })
