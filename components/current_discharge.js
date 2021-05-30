@@ -13,28 +13,29 @@ export default class Discharge extends Component {
         data: [],
         isLoading: true,
         showHistoricalData: false,
-        showDescripton: false
+        showDescripton: false,
       };
     }
 
     componentDidMount() {
-        this._isMounted = true;
-        fetch('https://waterservices.usgs.gov/nwis/iv/?format=json&sites=08195000&parameterCd=00060,00065&siteStatus=all')
-          .then((response) => response.json())
-          .then((json) => {
-            if (this._isMounted){
-              //console.log(json);
-              this.setState({ data: json });
-            }
-          })
-          .catch((error) => console.error(error))
-          .finally(() => {
-            this.setState({ isLoading: false });
-          });
+        // this._isMounted = true;
+        // fetch('https://waterservices.usgs.gov/nwis/iv/?format=json&sites=08195000&parameterCd=00060,00065&siteStatus=all')
+        //   .then((response) => response.json())
+        //   .then((json) => {
+        //     if (this._isMounted){
+        //       //console.log(json);
+        //       this.setState({ data: json });
+        //     }
+        //   })
+        //   .catch((error) => console.error(error))
+        //   .finally(() => {
+        //     this.setState({ isLoading: false });
+        //   });
+        
     }
     
     componentWillUnmount(){
-    this._isMounted = false;
+    //this._isMounted = false;
     }
 
     iconClick(){
@@ -42,12 +43,12 @@ export default class Discharge extends Component {
     }
 
     render() {
-        const data = this.state.data;
-        const isLoading = this.state.isLoading;
+        const data = this.props.data;
+        //const isLoading = this.state.isLoading;
+        const isLoading = this.props.refresh;
         let current_discharge;
         let connectionIssue = false;
-
-        if (this._isMounted) {
+        if (data.length !== 0 ) {
             try {
                 current_discharge = parseFloat(data.value.timeSeries[0].values[0].value[0].value,10);  
             } catch (error) {
@@ -62,22 +63,22 @@ export default class Discharge extends Component {
             "50-250 : Good Floating",
             "250+ : Jack would drown probably"
         ];
-
         return (
+            
             <View>
                 {isLoading ? <ActivityIndicator/> : (
                 <View>
                     <Card containerStyle={styles.card}>
-                    <Card.Title>Current discharge (cubic feet per second)</Card.Title>
+                    <Card.Title key={this.props.refresh}>Current discharge (cubic feet per second)</Card.Title>
                     <Card.Divider/>
                     {
                         <View style={{alignItems: 'center'}}>
                             {connectionIssue === false ? 
                                 <Text h3 style={styles.value}>
                                     {current_discharge}{"   "}
-                                        {current_discharge > 50 ? <Icon solid name='smile' type='font-awesome-5' color='#21db04' onPress={this.iconClick.bind(this)}/> : 
+                                        {current_discharge > 50 ? <Icon solid name='smile' size={35} type='font-awesome-5' color='#21db04' onPress={this.iconClick.bind(this)}/> : 
                                         current_discharge > 25 ? <Icon solid name='meh' size={35} type='font-awesome-5' color='#21db04' onPress={this.iconClick.bind(this)}/> : (
-                                        <Icon solid name='frown' type='font-awesome-5' color='#f54842' onPress={this.iconClick.bind(this)}/>
+                                        <Icon solid name='frown' size={35} type='font-awesome-5' color='#f54842' onPress={this.iconClick.bind(this)}/>
                                         )}
                                 </Text> :
                                 <Text>Error</Text>
@@ -103,9 +104,13 @@ export default class Discharge extends Component {
                                 </Overlay>
                                 
                             }
-                            <Text style={styles.date}>
+                            {data.length !== 0 ?<Text style={styles.date}>
                             Last Updated: {format(parseISO(data.value.timeSeries[0].values[0].value[0].dateTime), 'MM/dd/yyyy h:mm a')}
-                            </Text>
+                            </Text> :
+                            null
+
+                            }
+                            
                         </View>
                     }
                     </Card> 
