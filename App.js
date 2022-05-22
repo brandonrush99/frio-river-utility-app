@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, SafeAreaView, ScrollView, RefreshControl } from 'react-native';
 import { Weather } from './components/weather';
 import { PastFrioDischarge } from './components/past_frio_discharge';
@@ -6,172 +6,116 @@ import Discharge from './components/current_discharge';
 import DischargeLookup from './components/discharge_lookup';
 import * as Linking from 'expo-linking';
 import { Text,Header,Overlay,Card,Icon } from 'react-native-elements';
+import getData from './services/apiHelper';
 
-export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      infoClicked: false,
-      refresh: false,
-      data: [],
-      precipitationData: [],
-      forecastHourlyData: [],
-      forecastUrl: '',
-      forecastHourlyUrl: '',
-      forecastGridDataUrl: ''
-    };
-    this.infoClick = this.infoClick.bind(this);
-    this.toggleRefresh = this.toggleRefresh.bind(this);
-  }
+export default function App() {
+  const [infoClicked, setInfoClicked] = useState(false);
+  const [refresh, setRefresh] = useState(true);
+  const [data, setData] = useState([]);
+  const [precipitationData, setPrecipitationData] = useState([]);
+  const [forecastHourlyData, setForecastHourlyData] = useState([]);
+  const [forecastUrl, setForecastUrl] = useState('');
+  const [forecastHourlyUrl, setForecastHourlyUrl] = useState('');
+  const [forecastGridDataUrl, setForecastGridDataUrl] = useState('');
+
+  const firstRender = useRef(true);
 
   GITHUB_LINK = 'https://github.com/brandonrush99/frio-river-utility-app';
   ICON_LINK = 'https://www.flaticon.com/';
 
-  infoClick() {
-    this.setState(previousState => ({ infoClicked: !previousState.infoClicked }));
-  }
-  toggleRefresh(bool){
-    //this.setState(previousState => ({ refresh: !previousState.refresh }));
-    this.setState({refresh: bool});
-  }
-  wait(){
-    return new Promise(resolve => setTimeout(resolve,2000));
-  }
-  getUrls(){
-    let url = 'https://api.weather.gov/points/29.21,-99.74';
-    fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/geo+json',
-        'User-Agent': 'FrioWatch',
-        'Cache-Control': 'no-cache'
-      }
-    })
-    .then((response) => response.json())
-    .then((json) => {
-      this.setState({
-        forecastUrl: json.properties.forecast,
-        forecastHourlyUrl: json.properties.forecastHourly,
-        forecastGridDataUrl: json.properties.forecastGridData
-      },() => {
-        this.getForecast();
-      })
-    })
-    .catch((error) => console.error(error))
-  }
-  getPrecipitation() {
+  const getPrecipitation = () => {
     //let url = 'https://api.weather.gov/gridpoints/EWX/79,58';
-    fetch(this.state.forecastGridDataUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/geo+json',
-        'User-Agent': 'FrioWatch',
-        'Cache-Control': 'no-cache'
-      }
-    })
+    getData(this.state.forecastGridDataUrl)
     .then((response) => response.json())
     .then((json) => {
-      this.setState({precipitationData: json}, () => {
-        //this._isMounted = true;
-      });
+      setPrecipitationData(json);
     })
     .catch((error) => console.error(error))
     .finally(() => {
-      this.wait().then(() => this.toggleRefresh(false));
-      });
-  }
-  getForecastHourly() {
-    //let url = 'https://api.weather.gov/gridpoints/EWX/79,58/forecast/hourly';
-    fetch(this.state.forecastHourlyUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/geo+json',
-        'User-Agent': 'FrioWatch',
-        'Cache-Control': 'no-cache'
-      }
-    })
-    .then((response) => response.json())
-    .then((json) => {
-      this.setState({forecastHourlyData: json});
-    })
-    .catch((error) => console.error(error))
-    .finally(() => {
-      return this.getPrecipitation();
+      setRefresh(false);
     });
   }
-  getForecast(){
-    fetch(this.state.forecastUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/geo+json',
-        'User-Agent': 'FrioWatch',
-        'Cache-Control': 'no-cache'
-      }
+  const getForecastHourly = () => {
+    //let url = 'https://api.weather.gov/gridpoints/EWX/79,58/forecast/hourly';
+    getData(this.state.forecastHourlyUrl)
+    .then((response) => response.json())
+    .then((json) => {
+      setForecastHourlyData(json);
     })
+    .catch((error) => console.error(error))
+  }
+  const getForecast = () => {
+    getData(this.state.forecastUrl)
     .then((response) => response.json())
     .then((json) => {
       this.setState({forecastData: json});
     })
     .catch((error) => console.error(error))
-    .finally(() => {
-      return this.getForecastHourly();
-    });
   }
-  fetchCurrentDischarge(){
+
+  const getUrls = () => {
+    let url = 'https://api.weather.gov/points/29.21,-99.74';
+    getData(url)
+    .then((response) => response.json())
+    .then((json) => {
+      setForecastUrl(json.properties.forecast);
+      setForecastHourlyUrl(json.properties.forecastHourly);
+      setForecastGridDataUrl(json.properties.forecastGridData);
+    })
+    .catch((error) => console.error(error))
+  }
+
+  const fetchCurrentDischarge = () => {
     //this._isMounted = true;
     let url = 'https://waterservices.usgs.gov/nwis/iv/?format=json&sites=08195000&parameterCd=00060,00065&siteStatus=all';
-    fetch(url,{
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'FrioWatch',
-        'Cache-Control': 'no-cache'
-      }
+    getData(url)
+    .then((response) => response.json())
+    .then((json) => {
+        setData(json);
     })
-      .then((response) => response.json())
-      .then((json) => {
-        
-          //console.log(json);
-          this.setState({ data: json });
-        
-      })
-      .catch((error) => console.error(error))
-      .finally(() => {
-        //this.setState({ isLoading: false });
-        
-      });
+    .catch((error) => console.error(error))
   }
-  onRefresh(){
-    this.toggleRefresh(true);
-    this.fetchCurrentDischarge();
-    this.getUrls();
-    //this.wait().then(() => this.toggleRefresh(false));
+  const onRefresh = () => {
+    setRefresh(true);
+    fetchCurrentDischarge();
+    getUrls();
   }
 
-  componentDidMount(){
-    this.onRefresh();
-  }
+  useEffect(() => {
+    if (refresh){
+      console.log("refreshing");
+      fetchCurrentDischarge();
+      getUrls();
+      if (forecastUrl){
+        getForecast();
+      }
+      if (forecastHourlyUrl){
+        getForecastHourly();
+      }
+      if (forecastGridDataUrl){
+        getPrecipitation();
+      }
+    }
+  })
 
-
-  render() {
     return (
       
         <ScrollView
           style={styles.container}
           refreshControl={
             <RefreshControl 
-              refreshing={this.state.refresh} 
-              onRefresh={this.onRefresh.bind(this)} 
+              refreshing={refresh} 
+              onRefresh={onRefresh} 
               title="Refreshing..."
               />
           }
         >
           <Header
-            rightComponent={{ icon: 'info', color: '#fff', onPress: this.infoClick }}
+            rightComponent={{ icon: 'info', color: '#fff', onPress: () => {setInfoClicked(!infoClicked)}} }
             centerComponent={{ text:'Frio Watch', style: { color: '#fff', fontSize: 25} }}
           />
-          {this.state.infoClicked ? 
-            <Overlay onBackdropPress={this.infoClick} overlayStyle={styles.overlay} backdropStyle={styles.backdrop}>
+          {infoClicked ? 
+            <Overlay onBackdropPress={infoClicked} overlayStyle={styles.overlay} backdropStyle={styles.backdrop}>
               <Card>
                 <Text style={styles.infoText}>This app was created by Brandon Rush</Text>
                 <Card.Divider/>
@@ -189,22 +133,19 @@ export default class App extends Component {
             null
           }
             <Weather 
-              refresh={this.state.refresh} 
-              precipitationData={this.state.precipitationData} 
-              forecastHourlyData={this.state.forecastHourlyData}
-              forecastData={this.state.forecastData}
+              refresh={refresh} 
+              precipitationData={precipitationData} 
+              forecastHourlyData={forecastHourlyData}
+              forecastData={forecastData}
             />
             <View>
-              <Discharge refresh={this.state.refresh} data={this.state.data}/>
-              {/*  */}
+              <Discharge refresh={refresh} data={data}/>
               <DischargeLookup/>
               <PastFrioDischarge/>
             </View>
         </ScrollView>
     );
   }
-  
-};
 
 const styles = StyleSheet.create({
   container: {

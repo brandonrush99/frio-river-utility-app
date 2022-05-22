@@ -2,7 +2,7 @@
   "expo": {
     "name": "Frio Watch",
     "slug": "frio-river-water-mobile",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/floating_icon_white.png",
     "splash": {
@@ -19,17 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.BrandonRush.FrioWatch",
-      "buildNumber": "1.0.0",
-      "infoPlist": {
-        "NSAppTransportSecurity": {
-          "NSExceptionDomains": {
-            "http://api.weatherstack.com": {
-              "NSExceptionAllowsInsecureHTTPLoads" : true,
-              "NSIncludesSubdomains" : true
-            }
-          }
-        }
-      }
+      "buildNumber": "1.0.3"
     },
     "android": {
       "adaptiveIcon": {
