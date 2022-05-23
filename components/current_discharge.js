@@ -1,125 +1,88 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ActivityIndicator,View,StyleSheet } from 'react-native';
 import { Text,Card,Icon,ListItem, Overlay} from 'react-native-elements';
 import { format,parseISO } from 'date-fns';
 
-export default class Discharge extends Component {
-    _isMounted = false;
-  
-    constructor(props) {
-      super(props);
-  
-      this.state = {
-        data: [],
-        isLoading: true,
-        showHistoricalData: false,
-        showDescripton: false,
-      };
-    }
+export default function Discharge(props){
 
-    componentDidMount() {
-        // this._isMounted = true;
-        // fetch('https://waterservices.usgs.gov/nwis/iv/?format=json&sites=08195000&parameterCd=00060,00065&siteStatus=all')
-        //   .then((response) => response.json())
-        //   .then((json) => {
-        //     if (this._isMounted){
-        //       //console.log(json);
-        //       this.setState({ data: json });
-        //     }
-        //   })
-        //   .catch((error) => console.error(error))
-        //   .finally(() => {
-        //     this.setState({ isLoading: false });
-        //   });
+    const [showDescripton, setShowDescription] = useState(false);
+
+    const data = props.data;
+    const isLoading = props.refresh;
+    let current_discharge;
+    let connectionIssue = false;
+    if (data.length !== 0 ) {
+        try {
+            current_discharge = parseFloat(data.value.timeSeries[0].values[0].value[0].value,10);  
+        } catch (error) {
+            connectionIssue = true;
+        }
         
     }
-    
-    componentWillUnmount(){
-    //this._isMounted = false;
-    }
 
-    iconClick(){
-        this.setState(previousState => ({ showDescripton: !previousState.showDescripton }));
-    }
-
-    render() {
-        const data = this.props.data;
-        //const isLoading = this.state.isLoading;
-        const isLoading = this.props.refresh;
-        let current_discharge;
-        let connectionIssue = false;
-        if (data.length !== 0 ) {
-            try {
-                current_discharge = parseFloat(data.value.timeSeries[0].values[0].value[0].value,10);  
-            } catch (error) {
-                connectionIssue = true;
-            }
-            
-        }
-
-        const floatVals = [
-            "0-25 : Bad Floating",
-            "25-50 : Average Floating",
-            "50-250 : Good Floating",
-            "250+ : Jack would drown probably"
-        ];
-        return (
-            
+    const floatVals = [
+        "0-25 : Bad Floating",
+        "25-50 : Average Floating",
+        "50-250 : Good Floating",
+        "250+ : Jack would drown probably"
+    ];
+    return (
+        
+        <View>
+            {isLoading ? <ActivityIndicator/> : (
             <View>
-                {isLoading ? <ActivityIndicator/> : (
-                <View>
-                    <Card containerStyle={styles.card}>
-                    <Card.Title key={this.props.refresh}>Current discharge (cubic feet per second)</Card.Title>
-                    <Card.Divider/>
-                    {
-                        <View style={{alignItems: 'center'}}>
-                            {connectionIssue === false ? 
-                                <Text h3 style={styles.value}>
-                                    {current_discharge}{"   "}
-                                        {current_discharge > 50 ? <Icon solid name='smile' size={35} type='font-awesome-5' color='#21db04' onPress={this.iconClick.bind(this)}/> : 
-                                        current_discharge > 25 ? <Icon solid name='meh' size={35} type='font-awesome-5' color='#21db04' onPress={this.iconClick.bind(this)}/> : (
-                                        <Icon solid name='frown' size={35} type='font-awesome-5' color='#f54842' onPress={this.iconClick.bind(this)}/>
-                                        )}
-                                </Text> :
-                                <Text>Error</Text>
-                            }
-                        </View>
-                    }
-                    <Card.Divider/>
-                    {
-                        <View>
-                            {this.state.showDescripton === false ? null :
-                                <Overlay backdropStyle={styles.backdrop} overlayStyle={styles.overlay} onBackdropPress={this.iconClick.bind(this)}>
-                                    {
-                                        floatVals.map((v,i) => (
-                                        <ListItem key={i} >
-                                            <ListItem.Content>
-                                                <ListItem.Title style={styles.listValues}>{v}</ListItem.Title>
-                                            </ListItem.Content>
-                                        </ListItem>
-                                            )
-                                        ) 
-                                    }
-                                    
-                                </Overlay>
-                                
-                            }
-                            {data.length !== 0 ?<Text style={styles.date}>
-                            Last Updated: {format(parseISO(data.value.timeSeries[0].values[0].value[0].dateTime), 'MM/dd/yyyy h:mm a')}
+                <Card containerStyle={styles.card}>
+                <Card.Title key={props.refresh}>Current discharge (cubic feet per second)</Card.Title>
+                <Card.Divider/>
+                {
+                    <View style={{alignItems: 'center'}}>
+                        {connectionIssue === false ? 
+                            <Text h3 style={styles.value}>
+                                {current_discharge}{"   "}
+                                    {current_discharge > 50 ? <Icon solid name='smile' size={35} type='font-awesome-5' color='#21db04' onPress={() => {setShowDescription(!showDescripton)}}/> : 
+                                    current_discharge > 25 ? <Icon solid name='meh' size={35} type='font-awesome-5' color='#21db04' onPress={() => {setShowDescription(!showDescripton)}}/> : (
+                                    <Icon solid name='frown' size={35} type='font-awesome-5' color='#f54842' onPress={() => {setShowDescription(!showDescripton)}}/>
+                                    )}
                             </Text> :
-                            null
-
-                            }
+                            <Text>Error</Text>
+                        }
+                    </View>
+                }
+                <Card.Divider/>
+                {
+                    <View>
+                        {showDescripton === false ? null :
+                            <Overlay backdropStyle={styles.backdrop} overlayStyle={styles.overlay} onBackdropPress={() => {setShowDescription(!showDescripton)}}>
+                                {
+                                    floatVals.map((v,i) => (
+                                    <ListItem key={i} >
+                                        <ListItem.Content>
+                                            <ListItem.Title style={styles.listValues}>{v}</ListItem.Title>
+                                        </ListItem.Content>
+                                    </ListItem>
+                                        )
+                                    ) 
+                                }
+                                
+                            </Overlay>
                             
-                        </View>
-                    }
-                    </Card> 
-                </View>
-                
-                )}
+                        }
+                        {data.length !== 0 ?<Text style={styles.date}>
+                        Last Updated: {format(parseISO(data.value.timeSeries[0].values[0].value[0].dateTime), 'MM/dd/yyyy h:mm a')}
+                        </Text> :
+                        null
+
+                        }
+                        
+                    </View>
+                }
+                </Card> 
             </View>
-        );
-    }
+            
+            )}
+        </View>
+    );
+    
 }
 
 const styles = StyleSheet.create({
