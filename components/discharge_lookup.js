@@ -1,138 +1,105 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator,View,StyleSheet } from 'react-native';
 import { Text,Card,Button,Overlay} from 'react-native-elements';
-import { format,parseISO } from 'date-fns'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Dimensions } from 'react-native';
 import { HistoricDischargeService } from "./historic_discharge_service";
 
-export default class DischargeLookup extends Component {
-    _isMounted = false;
-  
-    constructor(props) {
-      super(props);
-  
-      this.state = {
-        data: [],
-        isLoading: true,
-        showStartSpinner: false,
-        showEndSpinner: false,
-        startDate: new Date(2020,6,1),
-        endDate: new Date(2020,6,2),
-        lookupDischarge: false,
-        startDischarge: false,
-      };
-    }
+export default function DischargeLookup() {
+    const [showStartSpinner, setShowStartSpinner] = useState(false);
+    const [showEndSpinner, setShowEndSpinner] = useState(false);
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(new Date());
+    const [lookupDischarge, setLookupDischarge] = useState(false);
+    const [startDischarge, setStartDischarge] = useState(false);
 
-    // componentDidMount() {
-    //     this._isMounted = true;
 
-    //     let url = `https://waterservices.usgs.gov/nwis/dv/?format=json&indent=on&sites=08195000&startDT=${this.state.startDate}&\
-    //     endDT=${this.state.endDate}&statCD=00001,00002,00003&siteStatus=all`;
-
-    //     fetch(url)
-    //       .then((response) => response.json())
-    //       .then((json) => {
-    //         if (this._isMounted){
-    //           //console.log(json);
-    //           this.setState({ data: json });
-    //         }
-    //       })
-    //       .catch((error) => console.error(error))
-    //       .finally(() => {
-    //         this.setState({ isLoading: false });
-    //       });
-    // }
-    
-    // componentWillUnmount(){
-    // this._isMounted = false;
-    // }
-
-    setStartDate = (event, date) => {
-        this.setState({startDate: date});
-        console.log("start date changed to " + date.toDateString());
+    const onStartDateChange = (event, date) => {
+        setStartDate(date);
     };
 
-    setEndDate = (event, date) => {
-        this.setState({endDate: date});
+    const onEndDateChange = (event, date) => {
+        setEndDate(date);
     };
 
-    toggleStartSpinner(){
-        this.setState(previousState => ({ showStartSpinner: !previousState.showStartSpinner }));
+    const toggleStartSpinner = () => {
+        setShowStartSpinner(!showStartSpinner);
     }
 
-    toggleEndSpinner(){
-        this.setState(previousState => ({ showEndSpinner: !previousState.showEndSpinner }));
+    const toggleEndSpinner = () => {
+        setShowEndSpinner(!showEndSpinner);
     }
 
-    toggleLookup(){
-        this.setState(previousState => ({ lookupDischarge: !previousState.lookupDischarge }));
+    const toggleLookup = () => {
+        setLookupDischarge(!lookupDischarge);
     }
 
-    toggleStartDischarge(){
-        this.setState(previousState => ({ startDischarge: !previousState.startDischarge }));
-        this.setState({lookupDischarge: false});
+    const toggleStartDischarge = () => {
+        setStartDischarge(!startDischarge);
+        setLookupDischarge(false);
     }
 
 
-    render(){
-        return(
-            <View>
-                <Card containerStyle={styles.card}>
-                    <Card.Title>Lookup historical discharge data</Card.Title>
-                    <Card.Divider/>
-                    {this.state.startDischarge === false ? <Button title="Start now!" type="solid" onPress={this.toggleStartDischarge.bind(this)}/> :
-                        <Overlay backdropStyle={styles.backdrop} overlayStyle={styles.overlay} onBackdropPress={this.toggleStartDischarge.bind(this)}>
-                            <Text style={styles.text}>Start Date: </Text>
-                            {this.state.showStartSpinner === false ? <Button title={this.state.startDate.toDateString()} type="outline" onPress={this.toggleStartSpinner.bind(this)}/> : 
-                                <View>
-                                    <DateTimePicker
-                                        onChange={this.setStartDate}
-                                        value={this.state.startDate}
-                                        display="spinner"
-                                        maximumDate={new Date()}
-                                        minimumDate={new Date(1950,8,30)}
-                                    />
-                                    <Button style={styles.doneButton} title="Done" type="solid" onPress={this.toggleStartSpinner.bind(this)}/>
-                                </View>
-                                
-                            }
-                            <Card.Divider/>
-                            <Text style={styles.text}>End Date: </Text>
-                            {this.state.showEndSpinner === false ? <Button title={this.state.endDate.toDateString()} type="outline" onPress={this.toggleEndSpinner.bind(this)}/> : 
-                                <View>
-                                    <DateTimePicker
-                                        onChange={this.setEndDate}
-                                        value={this.state.endDate}
-                                        display="spinner"
-                                        maximumDate={new Date()}
-                                        minimumDate={new Date(1950,8,30)}
-                                    />
-                                    <Button style={styles.doneButton} title="Done" type="solid" onPress={this.toggleEndSpinner.bind(this)}/>
-                                </View>
-                                
-                            }
-                            <Card.Divider/>
+    return(
+        <View>
+            <Card containerStyle={styles.card}>
+                <Card.Title>Lookup historical discharge data</Card.Title>
+                <Card.Divider/>
+                {startDischarge === false ? <Button title="Start now!" type="solid" onPress={toggleStartDischarge}/> :
+                    <Overlay backdropStyle={styles.backdrop} overlayStyle={styles.overlay} onBackdropPress={toggleStartDischarge}>
+                        <Text style={styles.text}>Start Date: </Text>
+                        {showStartSpinner === false ? <Button title={startDate.toDateString()} type="outline" onPress={toggleStartSpinner}/> : 
+                            <View>
+                                <DateTimePicker
+                                    mode="date"
+                                    onChange={onStartDateChange}
+                                    value={startDate}
+                                    display="spinner"
+                                    maximumDate={new Date()}
+                                    minimumDate={new Date(1950,8,30)}
+                                    textColor='#000000'
+                                />
+                                <Button style={styles.doneButton} title="Done" type="solid" onPress={toggleStartSpinner}/>
+                            </View>
                             
-                            {this.state.lookupDischarge === false ? <Button title="Lookup" type="solid" onPress={this.toggleLookup.bind(this)}/>  : 
-                                <View>
-                                    <HistoricDischargeService startDate={this.state.startDate} endDate={this.state.endDate}/>
-                                    <Text>{"\n"}</Text>
-                                    <Button title="Press to lookup again" type="solid" onPress={this.toggleLookup.bind(this)}/>
-                                </View>
-                                
-                            } 
-                        </Overlay>
-                    }
-                    
-                    
-                    
-                    
-                </Card>
+                        }
+                        <Card.Divider/>
+                        <Text style={styles.text}>End Date: </Text>
+                        {showEndSpinner === false ? <Button title={endDate.toDateString()} type="outline" onPress={toggleEndSpinner}/> : 
+                            <View>
+                                <DateTimePicker
+                                    onChange={onEndDateChange}
+                                    value={endDate}
+                                    display="spinner"
+                                    maximumDate={new Date()}
+                                    minimumDate={new Date(1950,8,30)}
+                                    textColor='#000000'
+                                />
+                                <Button style={styles.doneButton} title="Done" type="solid" onPress={toggleEndSpinner}/>
+                            </View>
+                            
+                        }
+                        <Card.Divider/>
+                        
+                        {lookupDischarge === false ? <Button title="Lookup" type="solid" onPress={toggleLookup}/>  : 
+                            <View>
+                                <HistoricDischargeService startDate={startDate} endDate={endDate}/>
+                                <Text>{"\n"}</Text>
+                                <Button title="Press to lookup again" type="solid" onPress={toggleLookup}/>
+                            </View>
+                            
+                        } 
+                    </Overlay>
+                }
                 
-            </View>
-        );
-    }
+                
+                
+                
+            </Card>
+            
+        </View>
+    );
+    
 
 }
 const styles = StyleSheet.create({

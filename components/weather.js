@@ -1,35 +1,29 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, View, TouchableOpacity} from 'react-native';
 import { Text,Image,Card } from 'react-native-elements';
 import { format,parseISO,isPast,isThisHour  } from 'date-fns';
 
-export class Weather extends Component {
-    constructor(props){
-        super(props)
-        this.state = {
-            forecastHourlyData: [],
-            precipitationData: [],
-            refresh: true,
-            futureMode: 0
-        }
-        this.toggleFutureMode = this.toggleFutureMode.bind(this);
-    }
+export function Weather(props) {
+      const [forecasthourlyData, setForecastHourlyData] = useState([]);
+      const [precipitationData, setPrecipitationData] = useState([]);
+      const [refresh, setRefresh] = useState(true);
+      const [futureMode, setFutureMode] = useState(0);
 
     //29.503235512087382, -99.72173117275169
-    toggleFutureMode(){
-      if (this.state.futureMode === 0){
-        this.setState({futureMode: 1});
+    const toggleFutureMode = () => {
+      if (futureMode === 0){
+        setFutureMode(1);
       }
-      else if (this.state.futureMode === 1){
-        this.setState({futureMode: 2});
+      else if (futureMode === 1){
+        setFutureMode(2);
       }
-      else if (this.state.futureMode === 2){
-        this.setState({futureMode: 0});
+      else if (futureMode === 2){
+        setFutureMode(0);
       }
       
     }
 
-    findPrecipitation(data, time){
+    const findPrecipitation = (data, time) => {
       let precipitationData = data.properties.probabilityOfPrecipitation;
       let index = 0;
       
@@ -48,7 +42,7 @@ export class Weather extends Component {
       return precipitationData.values[index].value;
     }
 
-    getFuturecast(data){
+    const getFuturecast = (data) => {
       let futurecast = [];
       let counter = 0;
       
@@ -65,7 +59,7 @@ export class Weather extends Component {
             {
               time: data.properties.periods[i].startTime.slice(0,19),
               temperature: data.properties.periods[i].temperature,
-              precipitation: this.findPrecipitation(this.props.precipitationData, data.properties.periods[i].startTime.slice(0,19))
+              precipitation: findPrecipitation(props.precipitationData, data.properties.periods[i].startTime.slice(0,19))
             }
           );
           counter++;
@@ -74,7 +68,7 @@ export class Weather extends Component {
       }
       return futurecast;
     }
-    getFuturecastDaily(data){
+    const getFuturecastDaily = (data) => {
       let days = data.properties.periods;
       let daysMap = [];
       let number = 0;
@@ -97,113 +91,114 @@ export class Weather extends Component {
       return daysMap;
     }
 
-    render(){
-        const isLoading = this.props.refresh;
-        const forecastHourlyData = this.props.forecastHourlyData;
-        const forecastData = this.props.forecastData;
-        let connectionIssue = true;
-        let forecastNow = 'None';
-        let futurecast = [];
-        let windspeed = 'None';
-        let iconUrl = '';
-        let isDayTime = true;
-        let daysMap = [];
-        if (typeof forecastHourlyData !== "undefined"){
-          try {
-              futurecast = this.getFuturecast(forecastHourlyData);
-              windspeed = forecastHourlyData.properties.periods[0].windSpeed;
-              forecastNow = forecastHourlyData.properties.periods[0].shortForecast;
-              iconUrl = forecastHourlyData.properties.periods[0].icon;
-              isDayTime = forecastHourlyData.properties.periods[0].isDaytime;
-              connectionIssue = false;
-          } catch (error) {
-              console.log(error);
-              //connectionIssue = true;
-          }
-          
-        }
-        if (typeof forecastData !== "undefined"){
-          try{
-            daysMap = this.getFuturecastDaily(forecastData);
-          } catch(error) {
-            console.log(error);
-          }
-        }
-        return(
-            <View style={styles.content}>
-                {isLoading ? <ActivityIndicator/> : (
-                <View>
-                  <TouchableOpacity onPress={this.toggleFutureMode}>
-                  {connectionIssue === false ? 
-                    <Card containerStyle={[styles.card, isDayTime === false ? styles.cardNight : styles.cardDay]}>
-                      <View style={styles.container}>
-                        <Text h1 style={{color:'white'}}>{futurecast[0].temperature}&#176;F</Text>
-                        
-                        <Image source={{uri: iconUrl}} style={styles.image}/>  
-                      </View>
-                      <Card.Divider style={{backgroundColor: 'white'}}/>
+    useEffect(() => {
+
+    });
+
+    
+    let connectionIssue = true;
+    let forecastNow = 'None';
+    let futurecast = [];
+    let windspeed = 'None';
+    let iconUrl = '';
+    let isDayTime = true;
+    let daysMap = [];
+    if (props.forecastHourlyData.length !== 0 && props.precipitationData.length !== 0){
+      try {
+          futurecast = getFuturecast(props.forecastHourlyData);
+          windspeed = props.forecastHourlyData.properties.periods[0].windSpeed;
+          forecastNow = props.forecastHourlyData.properties.periods[0].shortForecast;
+          iconUrl = props.forecastHourlyData.properties.periods[0].icon;
+          isDayTime = props.forecastHourlyData.properties.periods[0].isDaytime;
+          connectionIssue = false;
+      } catch (error) {
+          console.log(error);
+          //connectionIssue = true;
+      }
+      
+    }
+    if (props.forecastData.length !== 0){
+      try{
+        daysMap = getFuturecastDaily(props.forecastData);
+      } catch(error) {
+        console.log(error);
+      }
+    }
+    return(
+        <View style={styles.content}>
+            {props.refresh ? <ActivityIndicator/> : (
+            <View>
+              <TouchableOpacity onPress={toggleFutureMode}>
+              {connectionIssue === false ? 
+                <Card containerStyle={[styles.card, isDayTime === false ? styles.cardNight : styles.cardDay]}>
+                  <View style={styles.container}>
+                    <Text h1 style={{color:'white'}}>{futurecast[0].temperature}&#176;F</Text>
+                    
+                    <Image source={{uri: iconUrl}} style={styles.image}/>  
+                  </View>
+                  <Card.Divider style={{backgroundColor: 'white'}}/>
+                  <View>
+                    {futureMode === 0 ? 
                       <View>
-                        {this.state.futureMode === 0 ? 
-                          <View>
-                            <Text style={styles.textForecast}>{forecastNow}</Text>
-                            <Text style={styles.textNow}>{futurecast[0].precipitation}% rain</Text>
-                            <Text style={styles.textNow}>{windspeed} wind</Text>
-                          </View>
-                           :
-                          <View>
-                            {this.state.futureMode === 1 ?
-                            <View>
-                                {
-                                  futurecast.slice(1,).map((f,i) => (
-                                    <View key={i} style={styles.futureForecastContainer}>
-                                      <Text style={styles.textLaterTime}>{format(parseISO(f.time), 'h a')}: </Text>  
-                                      <Text style={styles.textLater}>{f.temperature}&#176;F</Text>
-                                      <Text style={styles.textLater}>{f.precipitation}% rain</Text>
-                                    </View>
-                                  ))
-                                }
-                              </View> :
-                              <View style={styles.dailyContainer}>
-                                {
-                                  daysMap.map((d,i) => (
-                                    <View key={i}>
-                                      <Text style={styles.day}>{d.name}</Text>
-                                      <View style={styles.temperatureContainer}>
-                                        <Text style={styles.highTemperature}>{d.temperatureHigh}&#176;F</Text>
-                                        <Text style={styles.lowTemperature}>{d.temperatureLow}&#176;F</Text>
-                                        <Image source={{uri: d.icon}} style={styles.futureImage}/>
-                                      </View>
-                                      
-                                    </View>
-                                  ))
-                                }
-                              </View>
+                        <Text style={styles.textForecast}>{forecastNow}</Text>
+                        <Text style={styles.textNow}>{futurecast[0].precipitation}% rain</Text>
+                        <Text style={styles.textNow}>{windspeed} wind</Text>
+                      </View>
+                        :
+                      <View>
+                        {futureMode === 1 ?
+                        <View>
+                            {
+                              futurecast.slice(1,).map((f,i) => (
+                                <View key={i} style={styles.futureForecastContainer}>
+                                  <Text style={styles.textLaterTime}>{format(parseISO(f.time), 'h a')}: </Text>  
+                                  <Text style={styles.textLater}>{f.temperature}&#176;F</Text>
+                                  <Text style={styles.textLater}>{f.precipitation}% rain</Text>
+                                </View>
+                              ))
                             }
-                            
+                          </View> :
+                          <View style={styles.dailyContainer}>
+                            {
+                              daysMap.map((d,i) => (
+                                <View key={i}>
+                                  <Text style={styles.day}>{d.name}</Text>
+                                  <View style={styles.temperatureContainer}>
+                                    <Text style={styles.highTemperature}>{d.temperatureHigh}&#176;F</Text>
+                                    <Text style={styles.lowTemperature}>{d.temperatureLow}&#176;F</Text>
+                                    <Image source={{uri: d.icon}} style={styles.futureImage}/>
+                                  </View>
+                                  
+                                </View>
+                              ))
+                            }
                           </View>
                         }
+                        
+                      </View>
+                    }
 
-                      </View>
-                      <Card.Divider style={{backgroundColor: 'white'}}/>
-                      <Text style={styles.asOf}>As of {format(parseISO(futurecast[0].time), 'MM/dd/yyyy h:mm a')}</Text>
-                    </Card> 
-                    :
-                    <Card containerStyle={[styles.card, isDayTime === false ? styles.cardNight : styles.cardDay]}>
-                      <View style={styles.container}>
-                        <Text h1 style={{color:'white'}}>None&#176;F</Text>
-                        <Text h4 style={{color:'white'}}>None</Text>
-                      </View>
-                      <Text style={styles.textNow}>Feels like -1&#176;F</Text>
-                      <Text style={styles.textNow}>-1% chance of rain</Text>
-                      <Card.Divider style={{backgroundColor: 'white'}}/>
-                    </Card>
-                  }
-                  </TouchableOpacity>
-                </View>
-                )} 
+                  </View>
+                  <Card.Divider style={{backgroundColor: 'white'}}/>
+                  <Text style={styles.asOf}>As of {format(parseISO(futurecast[0].time), 'MM/dd/yyyy h:mm a')}</Text>
+                </Card> 
+                :
+                <Card containerStyle={[styles.card, isDayTime === false ? styles.cardNight : styles.cardDay]}>
+                  <View style={styles.container}>
+                    <Text h1 style={{color:'white'}}>None&#176;F</Text>
+                    <Text h4 style={{color:'white'}}>None</Text>
+                  </View>
+                  <Text style={styles.textNow}>Feels like -1&#176;F</Text>
+                  <Text style={styles.textNow}>-1% chance of rain</Text>
+                  <Card.Divider style={{backgroundColor: 'white'}}/>
+                </Card>
+              }
+              </TouchableOpacity>
             </View>
-        )
-    }
+            )} 
+        </View>
+    )
+    
 }
 
 const styles = StyleSheet.create({
