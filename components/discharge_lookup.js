@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { ActivityIndicator,View,StyleSheet } from 'react-native';
-import { Text,Card,Button,Overlay} from 'react-native-elements';
+import { ActivityIndicator,View,StyleSheet,Dimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Text,Card,Button,Overlay,Icon} from '@rneui/themed';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Dimensions } from 'react-native';
+import { format,parseISO,isPast,isThisHour  } from 'date-fns';
 import { HistoricDischargeService } from "./historic_discharge_service";
 
 export default function DischargeLookup() {
@@ -42,13 +43,30 @@ export default function DischargeLookup() {
 
     return(
         <View>
-            <Card containerStyle={styles.card}>
-                <Card.Title>Lookup historical discharge data</Card.Title>
-                <Card.Divider/>
-                {startDischarge === false ? <Button title="Start now!" type="solid" onPress={toggleStartDischarge}/> :
+            <LinearGradient
+                colors={['#17AEBF','#4682B4']} 
+                style={styles.linearGradient}
+                start={{ x: 0, y: 1 }}
+                end={{ x: 1, y: 1 }}
+            >
+                {startDischarge === false ? 
+                <Button 
+                    buttonStyle={styles.startNowButton} 
+                    title="Lookup historical flowrate stats" 
+                    type="solid" 
+                    onPress={toggleStartDischarge}
+                    icon={<Icon name="search"/>}
+                /> :
                     <Overlay backdropStyle={styles.backdrop} overlayStyle={styles.overlay} onBackdropPress={toggleStartDischarge}>
                         <Text style={styles.text}>Start Date: </Text>
-                        {showStartSpinner === false ? <Button title={startDate.toDateString()} type="outline" onPress={toggleStartSpinner}/> : 
+                        {showStartSpinner === false ? 
+                            <Button 
+                                title={startDate.toDateString()}
+                                titleStyle={{color: '#17AEBF'}}
+                                type="outline" 
+                                onPress={toggleStartSpinner}
+                                disabled={lookupDischarge}
+                            /> : 
                             <View>
                                 <DateTimePicker
                                     mode="date"
@@ -57,15 +75,28 @@ export default function DischargeLookup() {
                                     display="spinner"
                                     maximumDate={new Date()}
                                     minimumDate={new Date(1950,8,30)}
-                                    textColor='#000000'
+                                    textColor='#17AEBF'
+                                    disabled={lookupDischarge}
                                 />
-                                <Button style={styles.doneButton} title="Done" type="solid" onPress={toggleStartSpinner}/>
+                                <Button 
+                                    buttonStyle={[styles.button, styles.doneButton]} 
+                                    title="Done" 
+                                    type="solid" 
+                                    onPress={toggleStartSpinner}
+                                />
+                                <Card.Divider/>
                             </View>
-                            
+                        
                         }
-                        <Card.Divider/>
                         <Text style={styles.text}>End Date: </Text>
-                        {showEndSpinner === false ? <Button title={endDate.toDateString()} type="outline" onPress={toggleEndSpinner}/> : 
+                        {showEndSpinner === false ? 
+                            <Button 
+                                title={endDate.toDateString()}
+                                titleStyle={{color: '#17AEBF'}}
+                                type="outline" 
+                                onPress={toggleEndSpinner}
+                                disabled={lookupDischarge}
+                            /> : 
                             <View>
                                 <DateTimePicker
                                     onChange={onEndDateChange}
@@ -73,19 +104,36 @@ export default function DischargeLookup() {
                                     display="spinner"
                                     maximumDate={new Date()}
                                     minimumDate={new Date(1950,8,30)}
-                                    textColor='#000000'
+                                    textColor='#17AEBF'
+                                    disabled={lookupDischarge}
                                 />
-                                <Button style={styles.doneButton} title="Done" type="solid" onPress={toggleEndSpinner}/>
+                                <Button 
+                                    buttonStyle={[styles.button, styles.doneButton]} 
+                                    title="Done" 
+                                    type="solid" 
+                                    onPress={toggleEndSpinner}
+                                />
                             </View>
                             
                         }
                         <Card.Divider/>
                         
-                        {lookupDischarge === false ? <Button title="Lookup" type="solid" onPress={toggleLookup}/>  : 
+                        {lookupDischarge === false ? 
+                            <Button 
+                                title="Lookup" 
+                                type="solid" 
+                                onPress={toggleLookup}
+                                buttonStyle={[styles.button]}
+                            />  : 
                             <View>
                                 <HistoricDischargeService startDate={startDate} endDate={endDate}/>
                                 <Text>{"\n"}</Text>
-                                <Button title="Press to lookup again" type="solid" onPress={toggleLookup}/>
+                                <Button 
+                                    title="Press to lookup again" 
+                                    type="solid" 
+                                    onPress={toggleLookup}
+                                    buttonStyle={[styles.button]}
+                                />
                             </View>
                             
                         } 
@@ -95,7 +143,7 @@ export default function DischargeLookup() {
                 
                 
                 
-            </Card>
+            </LinearGradient>
             
         </View>
     );
@@ -103,24 +151,37 @@ export default function DischargeLookup() {
 
 }
 const styles = StyleSheet.create({
+    button: {
+        backgroundColor: '#4682B4'
+    },
+    startNowButton: {
+        backgroundColor: 'transparent',
+        marginBottom: 5
+    },
     text: {
         fontSize: 20,
-        textAlign: "center"
+        textAlign: "center",
+        color: '#0C2340'
     },
     doneButton: {
         width: Dimensions.get('window').width / 3,
         alignSelf: 'center'
     },
-    card: {
-        borderRadius: 25
+    linearGradient: {
+        borderRadius: 25, 
+        borderColor: '#FDE3A7', 
+        borderWidth: 1, 
+        padding: 10, 
+        width: '90%', 
+        alignSelf: 'center', 
+        marginTop: 10
     },
     overlay: {
         width: '90%',
-        borderRadius: 15,
+        borderRadius: 15
     },
     backdrop: {
         //backgroundColor: 'black',
-        shadowOpacity: 100
     }
 
 });

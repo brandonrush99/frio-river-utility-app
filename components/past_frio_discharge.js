@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text,ListItem,Button,Overlay } from 'react-native-elements';
+import { Text,ListItem,Button,Overlay } from '@rneui/themed';
+import { LinearGradient } from 'expo-linear-gradient';
 
 
 export function PastFrioDischarge(){
@@ -13,79 +14,117 @@ export function PastFrioDischarge(){
    
     const years = [
         {
+          year: '2022',
+          discharge: '6'
+        },
+        {
           year: '2021',
-          discharge: '~86.0'
+          discharge: '86'
         },
         {
           year: '2020',
-          discharge: '~27.4'
+          discharge: '27'
         },
         {
           year: '2019',
-          discharge: '~100.2'
+          discharge: '99'
         },
         {
           year: '2018',
-          discharge: '~21.4'
+          discharge: '21'
         },
         {
           year: '2017',
-          discharge: '~70.0'
+          discharge: '70'
         },
         {
           year: '2016',
-          discharge: '~201.3'
+          discharge: '201'
         },
         {
           year: '2015',
-          discharge: '~303.2'
+          discharge: '303'
+        },
+        {
+          year: '2014',
+          discharge: '48'
+        },
+        {
+          year: '2013',
+          discharge: '29'
+        },
+        {
+          year: '2011',
+          discharge: '7'
+        },
+        {
+          year: '2010',
+          discharge: '49'
+        },
+        {
+          year: '2009',
+          discharge: '23'
+        },
+        {
+          year: '2008',
+          discharge: '26'
+        },
+        {
+          year: '2007',
+          discharge: '195'
         }
       ];
     return(
-        <View>
-          <Text>{"\n"}</Text>
-          <Button                
-            title='Quick Wade Family Historical Frio Rates'       
-            onPress={toggleHistoricalData} 
-            buttonStyle={styles.button}
-            ></Button>
-          {showHistoricalData == false ? null : (
-            <Overlay backdropStyle={styles.backdrop} overlayStyle={styles.overlay} onBackdropPress={toggleHistoricalData}>
+      <View style={styles.mainView}>
+        <Text style={styles.titleText}>Past Wade Family Frio Trip Flowrates</Text>
+        <View style={styles.listView}>
               {
                 years.map((y,i) => (
-                <ListItem key={i} bottomDivider>
-                    <ListItem.Content>
-                    <ListItem.Title style={styles.listItem}>{y.year} : {y.discharge}</ListItem.Title>
-                    </ListItem.Content>
-                </ListItem>
+                // <ListItem key={i} bottomDivider>
+                //     <ListItem.Content>
+                //     <ListItem.Title style={styles.listItem}>{y.year} : {y.discharge}</ListItem.Title>
+                //     </ListItem.Content>
+                // </ListItem>
+                <View key={i} style={styles.yearView}>
+                  <Text style={styles.dischargeText}>{y.discharge}</Text>
+                  <Text style={styles.yearText}>{y.year}</Text>
+                </View>
                 )
               )}
-            </Overlay>
-          )}
-          
         </View>
+      </View>
     )
     
 }
 
 const styles = StyleSheet.create({
-  button: {
-    width: '75%',
-    alignSelf: 'center',
-    borderRadius: 10,
-    borderColor: 'black',
+  mainView: {
+    flexDirection: 'column'
   },
-  overlay: {
-    width: '90%',
-    borderRadius: 15,
+  listView: {
+    flex: 1,
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly'
   },
-  backdrop: {
-      //backgroundColor: 'black',
-      shadowOpacity: 100
+  yearView: {
+    flexDirection: 'column',
+    marginVertical: 5,
+    alignItems: 'center',
+    flexBasis: '20%'
   },
-  listItem: {
-    alignSelf: 'center',
-    fontSize: 20
+  dischargeText: {
+    fontSize: 20,
+    color: '#0C2340'
+  },
+  yearText: {
+    color: '#AED6F1'
+  },
+  titleText: {
+    color: '#FDE3A7',
+    textAlign: 'center',
+    marginBottom: 5,
+    fontSize: 15
   }
 
 })
