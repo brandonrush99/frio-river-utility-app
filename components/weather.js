@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, View, TouchableOpacity} from 'react-native';
-import { Text,Image,Card } from 'react-native-elements';
+import { Text,Image,Icon,Skeleton } from '@rneui/themed';
 import { format,parseISO,isPast,isThisHour  } from 'date-fns';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export function Weather(props) {
-      const [forecasthourlyData, setForecastHourlyData] = useState([]);
-      const [precipitationData, setPrecipitationData] = useState([]);
-      const [refresh, setRefresh] = useState(true);
       const [futureMode, setFutureMode] = useState(0);
 
     //29.503235512087382, -99.72173117275169
@@ -90,11 +88,6 @@ export function Weather(props) {
       }
       return daysMap;
     }
-
-    useEffect(() => {
-
-    });
-
     
     let connectionIssue = true;
     let forecastNow = 'None';
@@ -126,28 +119,42 @@ export function Weather(props) {
     }
     return(
         <View style={styles.content}>
-            {props.refresh ? <ActivityIndicator/> : (
+            {props.refresh ? 
+            <Skeleton 
+              skeletonStyle={{borderColor: '#FDE3A7', backgroundColor: '#17AEBF', alignSelf: 'center'}}
+              width={'100%'}
+              height={'100%'}
+              animation='pulse'
+          /> : (
             <View>
               <TouchableOpacity onPress={toggleFutureMode}>
               {connectionIssue === false ? 
-                <Card containerStyle={[styles.card, isDayTime === false ? styles.cardNight : styles.cardDay]}>
-                  <View style={styles.container}>
-                    <Text h1 style={{color:'white'}}>{futurecast[0].temperature}&#176;F</Text>
-                    
-                    <Image source={{uri: iconUrl}} style={styles.image}/>  
-                  </View>
-                  <Card.Divider style={{backgroundColor: 'white'}}/>
-                  <View>
+                <LinearGradient
+                  colors={['#17AEBF','#4682B4']} 
+                  style={{borderRadius: 25, borderColor: '#FDE3A7', borderWidth: 1, padding: 10, width: '90%', alignSelf: 'center', marginVertical: 5}}
+                  start={{ x: 0, y: 1 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  
+                  
+                  
+                  <View style={{marginBottom: 10}}>
                     {futureMode === 0 ? 
                       <View>
-                        <Text style={styles.textForecast}>{forecastNow}</Text>
-                        <Text style={styles.textNow}>{futurecast[0].precipitation}% rain</Text>
-                        <Text style={styles.textNow}>{windspeed} wind</Text>
+                        <View style={styles.container}>
+                          <Text h2 style={{color:'white'}}>{futurecast[0].temperature}&#176;F</Text>
+                          <Image source={{uri: iconUrl}} style={styles.image}/>  
+                        </View>
+                        <View>
+                          <Text style={styles.textForecast}>{forecastNow}</Text>
+                          <Text style={styles.textNow}>{futurecast[0].precipitation}% rain</Text>
+                          <Text style={styles.textNow}>{windspeed} wind</Text>
+                        </View>
                       </View>
                         :
                       <View>
                         {futureMode === 1 ?
-                        <View>
+                        <View style={{flexDirection: 'column', alignContent: 'flex-start'}}>
                             {
                               futurecast.slice(1,).map((f,i) => (
                                 <View key={i} style={styles.futureForecastContainer}>
@@ -179,19 +186,45 @@ export function Weather(props) {
                     }
 
                   </View>
-                  <Card.Divider style={{backgroundColor: 'white'}}/>
-                  <Text style={styles.asOf}>As of {format(parseISO(futurecast[0].time), 'MM/dd/yyyy h:mm a')}</Text>
-                </Card> 
+                 
+                  <Text style={styles.asOf}>As of {format(parseISO(futurecast[0].time), 'M/d/yy h:mm a')}</Text>
+                  {futureMode === 0 ? 
+                    <View style={styles.bottomPageIconView}>
+                        <Icon type='font-awesome-5' name='circle' solid size={8} iconStyle={styles.bottomPageIcon}/>
+                        <Icon type='font-awesome-5' name='circle' size={8} iconStyle={styles.bottomPageIcon}/>
+                        <Icon type='font-awesome-5' name='circle' size={8} iconStyle={styles.bottomPageIcon}/> 
+                    </View> :
+                    <View>
+                      {futureMode === 1 ?
+                        <View style={styles.bottomPageIconView}>
+                          <Icon type='font-awesome-5' name='circle' size={8} iconStyle={styles.bottomPageIcon}/>
+                          <Icon type='font-awesome-5' name='circle' solid size={8} iconStyle={styles.bottomPageIcon}/>
+                          <Icon type='font-awesome-5' name='circle' size={8} iconStyle={styles.bottomPageIcon}/> 
+                        </View>  :
+                        <View style={styles.bottomPageIconView}>
+                          <Icon type='font-awesome-5' name='circle' size={8} iconStyle={styles.bottomPageIcon}/>
+                          <Icon type='font-awesome-5' name='circle' size={8} iconStyle={styles.bottomPageIcon}/>
+                          <Icon type='font-awesome-5' name='circle' solid size={8} iconStyle={styles.bottomPageIcon}/> 
+                        </View>
+                      }
+                    </View>
+                  }
+                  
+                </LinearGradient> 
                 :
-                <Card containerStyle={[styles.card, isDayTime === false ? styles.cardNight : styles.cardDay]}>
+                <LinearGradient
+                  colors={['#17AEBF','#4682B4']} 
+                  style={{borderRadius: 25, borderColor: '#FDE3A7', borderWidth: 1, padding: 10, width: '90%', alignSelf: 'center', marginVertical: 5}}
+                  start={{ x: 0, y: 1 }}
+                  end={{ x: 1, y: 1 }}
+                >
                   <View style={styles.container}>
                     <Text h1 style={{color:'white'}}>None&#176;F</Text>
                     <Text h4 style={{color:'white'}}>None</Text>
                   </View>
                   <Text style={styles.textNow}>Feels like -1&#176;F</Text>
                   <Text style={styles.textNow}>-1% chance of rain</Text>
-                  <Card.Divider style={{backgroundColor: 'white'}}/>
-                </Card>
+                </LinearGradient>
               }
               </TouchableOpacity>
             </View>
@@ -203,23 +236,19 @@ export function Weather(props) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 25
-  },
-  cardDay: {
-    backgroundColor: '#94b4e3',
-  },
-  cardNight: {
-    backgroundColor: '#3c4a91',
+    borderRadius: 25,
+    backgroundColor: '#4682B4',
+    borderColor: '#FDE3A7'
   },
   container: {
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   futureForecastContainer: {
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-evenly'
   },
   dailyContainer: {
     display: 'flex',
@@ -232,7 +261,7 @@ const styles = StyleSheet.create({
   },
   day: {
     fontSize: 16,
-    color: 'gray',
+    color: '#0C2340',
     alignSelf: 'center'
   },
   highTemperature: {
@@ -256,9 +285,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   image: {
-    alignContent: 'center',
-    width: 50,
-    height: 50
+    width: 45,
+    height: 45,
+    marginRight: 5
   },
   futureImage: {
     width: 50,
@@ -274,16 +303,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   textNow: {
-    fontSize: 17,
-    color: 'white',
+    fontSize: 15,
+    color: '#0C2340',
   },
   textForecast: {
-    fontSize: 18,
-    color: 'white'
+    fontSize: 16,
+    color: '#0C2340'
   },
   textLaterTime: {
     fontSize: 16,
-    color: 'gray',
+    color: '#0C2340',
   },
   textLater: {
     fontSize: 17,
@@ -291,11 +320,16 @@ const styles = StyleSheet.create({
     
   },
   asOf: {
-    color: 'gray',
-    textAlign: 'center'
+    color: '#FDE3A7',
+    textAlign: 'center',
+    marginBottom: 10
   },
-  icon: {
-    
-    
+  bottomPageIconView: {
+    flexDirection: 'row', 
+    justifyContent: 'center'
+  },
+  bottomPageIcon: {
+    marginHorizontal: 2,
+    color: '#0C2340'
   }
 })

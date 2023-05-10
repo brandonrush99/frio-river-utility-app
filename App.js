@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, ScrollView, RefreshControl } from 'react-native';
+import { StyleSheet, View, ScrollView, RefreshControl, Dimensions } from 'react-native';
 import { Weather } from './components/weather';
-import { PastFrioDischarge } from './components/past_frio_discharge';
-import Discharge from './components/current_discharge';
 import DischargeLookup from './components/discharge_lookup';
 import * as Linking from 'expo-linking';
-import { Text,Header,Overlay,Card,Icon } from 'react-native-elements';
+import { Text,Header,Overlay,Image } from '@rneui/themed';
 import {getData} from './services/apiHelper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import FlowrateGraph from './components/flowrate_graph';
+import { LinearGradient } from 'expo-linear-gradient';
+import FlowrateCard from './components/flowrate_card';
 
 export default function App() {
   const [infoClicked, setInfoClicked] = useState(false);
@@ -24,8 +25,9 @@ export default function App() {
 
   const firstRender = useRef(true);
 
-  const GITHUB_LINK = 'https://github.com/brandonrush99/frio-river-utility-app';
+  const USGS_LINK = 'https://waterservices.usgs.gov/';
   const ICON_LINK = 'https://www.flaticon.com/';
+  const WEATHER_LINK = 'https://www.weather.gov/';
 
   const wait = () => {
     return new Promise(resolve => setTimeout(resolve,2000));
@@ -116,39 +118,57 @@ export default function App() {
                 />
             }
           >
+            <LinearGradient 
+              colors={['#4682B4', '#6C88A4', '#17AEBF', '#AED6F1'].reverse()} 
+              style={styles.linearGradient}
+            >
             <Header
-              rightComponent={{ icon: 'info', color: '#fff', onPress: () => {setInfoClicked(!infoClicked)}} }
               centerComponent={{ text:'Frio Watch', style: { color: '#fff', fontSize: 25} }}
+              rightComponent={
+                <Image 
+                  source={require('./assets/floating_icon.png')} 
+                  style={{width: Dimensions.get('window').width/12, height: Dimensions.get('window').width/12}}
+                  onPress={() => {setInfoClicked(!infoClicked)}}
+                />
+              }
+              backgroundColor='#17AEBF'
             />
             {infoClicked ? 
-              <Overlay onBackdropPress={() => {setInfoClicked(!infoClicked)}} overlayStyle={styles.overlay} backdropStyle={styles.backdrop}>
-                <Card>
-                  <Text style={styles.infoText}>This app was created by Brandon Rush</Text>
-                  <Card.Divider/>
-                  <Text style={styles.githubLink} onPress={() => { Linking.openURL(GITHUB_LINK) }}>Click here for the GitHub for this project</Text>
-                  <Card.Divider/>
-                  <Text style={styles.infoText}>
-                    Icon for app made by Freepik from{" "}
-                    <Text style={styles.githubLink} onPress={() => {Linking.openURL(ICON_LINK) }}>
-                      www.flaticon.com
+              <Overlay onBackdropPress={() => {setInfoClicked(!infoClicked)}} overlayStyle={styles.overlay}>
+                  <Text h4 style={styles.infoText}>
+                    Thank you for downloading Frio Watch!
+                  </Text>
+                  <Text style={styles.infoText}>This app was created to make it easy to view flowrate data from the Frio River.
+                    Here are some things to know about the contents of the app:
+                  </Text>
+                  <Text style={styles.numberedText}>1. Most things in the app are 'Touchable', meaning that tapping on them will reveal more content.</Text>
+                  <Text style={styles.numberedText}>2. All flowrates are in units of cubic feet per second.</Text>
+                  <Text style={styles.numberedText}>3. Flowrate data is pulled from the{" "}
+                    <Text style={styles.link} onPress={() => {Linking.openURL(USGS_LINK)}}>USGS website.</Text>
+                  </Text>
+                  <Text style={styles.numberedText}>4. Weather data is pulled from the{" "}
+                    <Text style={styles.link} onPress={() => {Linking.openURL(WEATHER_LINK)}}>National Weather Service website.</Text>
+                  </Text>
+                  <Text style={styles.numberedText}>5. Icon for app created by{" "}
+                    <Text style={styles.link} onPress={() => {Linking.openURL(ICON_LINK) }}>
+                      Freepik - Flaticon
                     </Text>
                   </Text>
-                </Card>
-                
-              </Overlay> :
-              null
+                  <Text style={styles.numberedText}>6. Tap the icon in the top right corner to bring this page up again. Tap anywhere outside to continue, and enjoy!</Text>
+              </Overlay> : null
             }
-              <Weather 
-                refresh={refresh} 
-                precipitationData={precipitationData} 
-                forecastHourlyData={forecastHourlyData}
-                forecastData={forecastData}
-              />
               <View>
-                <Discharge refresh={refresh} data={dischargeData}/>
-                <DischargeLookup/>
-                <PastFrioDischarge/>
+                  <Weather 
+                    refresh={refresh} 
+                    precipitationData={precipitationData} 
+                    forecastHourlyData={forecastHourlyData}
+                    forecastData={forecastData}
+                  />
+                  <FlowrateCard refresh={refresh} dischargeData={dischargeData}/>
+                  <FlowrateGraph refresh={refresh} currentFlowrateData={dischargeData}/>
+                  <DischargeLookup/>
               </View>
+            </LinearGradient>
           </ScrollView>
         </SafeAreaProvider>
     );
@@ -157,8 +177,10 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#cff6ff'
-    
+  },
+  linearGradient: {
+    minHeight: Dimensions.get("window").height, 
+    paddingBottom: 10
   },
   icon: {
     textAlign: 'center'
@@ -170,24 +192,27 @@ const styles = StyleSheet.create({
     height:'100%',
     width:'100%'
   },
-  header: {
-    backgroundColor: '#03a5fc'
-  },
-  infoText: {
-    fontSize: 17,
-    textAlign: 'center'
-  },
-  githubLink: {
+  link: {
     fontSize: 17,
     textAlign: 'center',
     color: '#0398fc',
     textDecorationLine: 'underline'
   },
-  backdrop: {
-    shadowOpacity: 100
-  },
   overlay: {
     width: '90%',
     borderRadius: 15,
-},
+    backgroundColor: '#AED6F1'
+  },
+  infoText: {
+    textAlign: 'center',
+    marginVertical: 5,
+    color: '#0C2340',
+    fontSize: 20
+  },
+  numberedText: {
+    fontSize: 17,
+    marginVertical: 5,
+    color: '#0C2340'
+  }
+
 })

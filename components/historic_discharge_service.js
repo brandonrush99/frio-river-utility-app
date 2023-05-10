@@ -59,10 +59,19 @@ export function HistoricDischargeService(props){
         <View style={styles.container}>
           <Card containerStyle={styles.card}>
             {minimum === 100000000 && maximum === -1 ? <ActivityIndicator/> :
-            <View>
-              <Text h4 style={styles.text}>Maximum Value: {maximum}</Text>
-              <Text h4 style={styles.text}>Minimum Value: {minimum}</Text>
-              <Text h4 style={styles.text}>Mean Value: {meanValue}</Text>
+              <View style={styles.statsView}>
+                <View style={styles.statView}>
+                    <Text style={styles.stat}>{minimum}</Text>
+                    <Text style={styles.statText}>Min</Text> 
+                </View>
+                <View style={styles.statView}>
+                    <Text style={styles.stat}>{meanValue}</Text>
+                    <Text style={styles.statText}>Mean</Text> 
+                </View>
+                <View style={styles.statView}>
+                    <Text style={styles.stat}>{maximum}</Text>
+                    <Text style={styles.statText}>Max</Text> 
+                </View>
             </View>
             }
             
@@ -79,11 +88,26 @@ const styles = StyleSheet.create({
   container : {
     textAlign: 'center'
   },
-  text: {
-    textAlign: 'center'
-  },
   card: {
-   borderColor: 'red'
+   borderColor: '#17AEBF',
+   borderRadius: 25
+  },
+  statsView: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly'
+  },
+  statView: {
+      flexDirection: 'column'
+  },
+  statText: {
+      textAlign: 'center',
+      fontSize: 12,
+      color: '#4682B4'
+  },
+  stat: {
+      fontSize: 25,
+      textAlign: 'center',
+      color: '#0C2340'
   }
     
 })
