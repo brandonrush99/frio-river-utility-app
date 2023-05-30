@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { ActivityIndicator,View,StyleSheet,Dimensions } from 'react-native';
+import { View,StyleSheet,Dimensions,Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text,Card,Button,Overlay,Icon} from '@rneui/themed';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { format,parseISO,isPast,isThisHour  } from 'date-fns';
 import { HistoricDischargeService } from "./historic_discharge_service";
 
 export default function DischargeLookup() {
@@ -14,13 +13,34 @@ export default function DischargeLookup() {
     const [lookupDischarge, setLookupDischarge] = useState(false);
     const [startDischarge, setStartDischarge] = useState(false);
 
+    
 
     const onStartDateChange = (event, date) => {
-        setStartDate(date);
+        if (Platform.OS === 'android'){
+           if (event.type === 'set'){
+                setShowStartSpinner(false);
+                setStartDate(date);
+                
+            } 
+        }
+        else {
+            setStartDate(date);
+        }
+        
+        
     };
 
     const onEndDateChange = (event, date) => {
         setEndDate(date);
+        if (Platform.OS === 'android'){
+            if (event.type === 'set'){
+                setShowEndSpinner(false);
+                setEndDate(date);
+            }
+        }
+        else {
+            setEndDate(date);
+        }
     };
 
     const toggleStartSpinner = () => {
@@ -124,6 +144,7 @@ export default function DischargeLookup() {
                                 type="solid" 
                                 onPress={toggleLookup}
                                 buttonStyle={[styles.button]}
+                                disabled={startDate.toDateString() === new Date().toDateString() && endDate.toDateString() === new Date().toDateString() || endDate < startDate}
                             />  : 
                             <View>
                                 <HistoricDischargeService startDate={startDate} endDate={endDate}/>

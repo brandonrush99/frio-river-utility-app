@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ActivityIndicator,View,StyleSheet } from 'react-native';
-import { Text,Card,Icon,ListItem, Overlay,Skeleton} from '@rneui/themed';
+import { View,StyleSheet } from 'react-native';
+import { Text,Icon,ListItem, Overlay,Skeleton} from '@rneui/themed';
 import { format,parseISO } from 'date-fns';
 
 export default function CurrentFlowrate(props){
@@ -16,7 +16,7 @@ export default function CurrentFlowrate(props){
             const data = props.data;
             if (data.length !== 0 ) {
                 try {
-                    setCurrentDischarge(parseFloat(data.value.timeSeries[0].values[0].value[0].value,10));  
+                    setCurrentDischarge(parseFloat(data.value.timeSeries[0].values[0].value[0].value,10));
                 } catch (error) {
                     setConnectionIssue(true);
                 }
@@ -46,7 +46,8 @@ export default function CurrentFlowrate(props){
                             <View></View>
                             <Text style={styles.value}>{currentDischarge}</Text>
                             <Text style={{alignSelf: 'center'}}>
-                                    {currentDischarge > 50 ? <Icon solid name='smile' size={35} type='font-awesome-5' color='#21db04' onPress={() => {setShowDescription(!showDescripton)}}/> : 
+                                    {currentDischarge > 250 ? <Icon solid name='laugh' size={35} type='font-awesome-5' color='#21db04' onPress={() => {setShowDescription(!showDescripton)}}/> :
+                                    currentDischarge > 50 ? <Icon solid name='smile' size={35} type='font-awesome-5' color='#21db04' onPress={() => {setShowDescription(!showDescripton)}}/> : 
                                     currentDischarge > 25 ? <Icon solid name='meh' size={35} type='font-awesome-5' color='#21db04' onPress={() => {setShowDescription(!showDescripton)}}/> : (
                                     <Icon solid name='frown' size={35} type='font-awesome-5' color='#8B0000' onPress={() => {setShowDescription(!showDescripton)}}/>)}
                             </Text> 
@@ -58,7 +59,7 @@ export default function CurrentFlowrate(props){
                 {
                     <View>
                         {showDescripton === false ? null :
-                            <Overlay backdropStyle={styles.backdrop} overlayStyle={styles.overlay} onBackdropPress={() => {setShowDescription(!showDescripton)}}>
+                            <Overlay overlayStyle={styles.overlay} onBackdropPress={() => {setShowDescription(!showDescripton)}}>
                                 {
                                     floatVals.map((v,i) => (
                                     <ListItem key={i} >
@@ -115,10 +116,6 @@ const styles = StyleSheet.create({
     overlay: {
         width: '90%',
         borderRadius: 15,
-    },
-    backdrop: {
-        //backgroundColor: 'black',
-        shadowOpacity: 100
     },
     title: {
         textAlign: 'center',

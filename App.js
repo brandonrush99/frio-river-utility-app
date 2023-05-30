@@ -4,7 +4,7 @@ import { Weather } from './components/weather';
 import DischargeLookup from './components/discharge_lookup';
 import * as Linking from 'expo-linking';
 import { Text,Header,Overlay,Image } from '@rneui/themed';
-import {getData} from './services/apiHelper';
+import {getData} from './services/api_helper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import FlowrateGraph from './components/flowrate_graph';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -154,7 +154,6 @@ export default function App() {
                       Freepik - Flaticon
                     </Text>
                   </Text>
-                  <Text style={styles.numberedText}>6. Tap the icon in the top right corner to bring this page up again. Tap anywhere outside to continue, and enjoy!</Text>
               </Overlay> : null
             }
               <View>

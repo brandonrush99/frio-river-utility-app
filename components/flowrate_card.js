@@ -5,7 +5,7 @@ import OnThisDay from './on_this_day';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Skeleton,Icon } from '@rneui/themed';
 import { PastFrioDischarge } from './past_frio_discharge';
-import { getOnThisDayData } from '../services/apiHelper';
+import { getOnThisDayData } from '../services/api_helper';
 import { format } from 'date-fns';
 
 export default function FlowrateCard(props){

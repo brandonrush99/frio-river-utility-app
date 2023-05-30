@@ -2,7 +2,7 @@
   "expo": {
     "name": "Frio Watch",
     "slug": "frio-river-water-mobile",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/floating_icon_white.png",
     "splash": {
@@ -19,16 +19,22 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.BrandonRush.FrioWatch",
-      "buildNumber": "1.0.3"
+      "buildNumber": "1.0.5"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.BrandonRush.FrioWatch"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4861fe77-13ad-4fdb-9f56-cb112b3dd787"
+      }
     }
   }
 }

@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ActivityIndicator,View,StyleSheet } from 'react-native';
 import { Text,Card} from 'react-native-elements';
 import { format } from 'date-fns';
-import { getStats } from '../services/apiHelper';
+import { getStats } from '../services/api_helper';
 
 export function HistoricDischargeService(props){
 

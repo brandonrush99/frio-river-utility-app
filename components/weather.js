@@ -96,6 +96,7 @@ export function Weather(props) {
     let iconUrl = '';
     let isDayTime = true;
     let daysMap = [];
+    
     if (props.forecastHourlyData.length !== 0 && props.precipitationData.length !== 0){
       try {
           futurecast = getFuturecast(props.forecastHourlyData);
@@ -104,6 +105,9 @@ export function Weather(props) {
           iconUrl = props.forecastHourlyData.properties.periods[0].icon;
           isDayTime = props.forecastHourlyData.properties.periods[0].isDaytime;
           connectionIssue = false;
+          if (iconUrl.toString().includes(",0")){
+            iconUrl = iconUrl.replace(",0","");
+          }
       } catch (error) {
           console.log(error);
           //connectionIssue = true;

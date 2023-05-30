@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ActivityIndicator,View,StyleSheet, Dimensions,TouchableOpacity } from 'react-native';
-import { Text, Skeleton, Icon } from '@rneui/themed';
+import { ActivityIndicator,View,StyleSheet, Dimensions,TouchableOpacity,Platform } from 'react-native';
+import { Text, Icon } from '@rneui/themed';
 import { format } from 'date-fns';
 import {LineChart} from "react-native-chart-kit";
-import { getLineGraphData } from '../services/apiHelper';
+import { getLineGraphData } from '../services/api_helper';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function FlowrateGraph(props){
@@ -14,6 +14,7 @@ export default function FlowrateGraph(props){
     const [flowrateYearData, setFlowrateYearData] = useState([]);
     const [graphVersion, setGraphVersion] = useState(true);
     const [currentFlowrate, setCurrentFlowrate] = useState(-1);
+    const [chartParentWidth, setChartParentWidth] = useState(0);
 
     const firstRender = useRef(true);
 
@@ -34,7 +35,7 @@ export default function FlowrateGraph(props){
     const calculateYearLabels = () => {
         let labels = [];
         let date = new Date();
-        for (let i = 5; i > 0; i--){
+        for (let i = 4; i > 0; i--){
             let day = new Date(new Date().setFullYear(date.getFullYear() - i));
             labels.push(day);
         }
@@ -75,10 +76,15 @@ export default function FlowrateGraph(props){
             dateLabels.forEach(label => {
                 formattedLabels.push(format(label, "M/d/yy"))
             });
+            formattedLabels.push(format(new Date(), "M/d/yy"));
             setYearLabels(formattedLabels);
-            getLineGraphData(dateLabels).then((response) => {
-                setFlowrateYearData(response);
-            });
+            if (currentFlowrate !== -1 ) {
+                //Get the data for the last 5 days
+                getLineGraphData(dateLabels).then((response) => {
+                    response.push(currentFlowrate);
+                    setFlowrateYearData(response);
+                });
+            }
         }
         
     },[props.currentFlowrateData, currentFlowrate]);
@@ -125,15 +131,11 @@ export default function FlowrateGraph(props){
         <View style={styles.mainView}>
             
             {flowrateDayData.length === 0 || flowrateYearData.length === 0 || props.refresh === true ? 
-            <Skeleton 
-                skeletonStyle={{borderColor: '#FDE3A7', backgroundColor: '#17AEBF', alignSelf: 'center'}}
-                width={'100%'}
-                height={'100%'}
-                animation='pulse'
-            /> : 
+            <ActivityIndicator color='#0C2340'/> : 
             <View>
                 {graphVersion ?
-                    <View>
+                    <View onLayout={({ nativeEvent }) => setChartParentWidth(nativeEvent.layout.width)}
+                    style={styles.chartWrapper}>
                        <TouchableOpacity onPress={toggleGraph}>
                             <LinearGradient
                                 colors={['#17AEBF','#4682B4']} 
@@ -144,8 +146,8 @@ export default function FlowrateGraph(props){
                             <Text style={styles.graphTitle}>Flowrate last 5 days</Text>
                             <LineChart
                                 data={dayData}
-                                width={Dimensions.get("window").width * .90}
-                                height={Dimensions.get("window").height / 5}
+                                width={Platform.OS === 'android' ? Dimensions.get("window").width : Dimensions.get("window").width * .9}
+                                height={Platform.OS === 'android' ? Dimensions.get("window").height / 4 : Dimensions.get("window").height / 5}
                                 chartConfig={chartConfig}
                                 bezier
                                 withDots={true}
@@ -172,8 +174,8 @@ export default function FlowrateGraph(props){
                             <Text style={styles.graphTitle}>Flowrate on this day last 5 years</Text>    
                             <LineChart
                                 data={yearData}
-                                width={Dimensions.get("window").width * .90}
-                                height={Dimensions.get("window").height / 5}
+                                width={Platform.OS === 'android' ? Dimensions.get("window").width : Dimensions.get("window").width * .9}
+                                height={Platform.OS === 'android' ? Dimensions.get("window").height / 4 : Dimensions.get("window").height / 5}
                                 chartConfig={chartConfig}
                                 bezier
                                 withDots={true}
